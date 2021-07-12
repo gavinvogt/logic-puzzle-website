@@ -178,60 +178,71 @@ function addOptionInput(categoryId, optionId) {
             + categoryId + "," + optionId + "' required><br>";
 }
 
+/**
+ * Generates the HTML code for a Condition input
+ * @returns {string} holding the HTML code for a Condition
+ */
 function generateConditionInput() {
     // Create condition container
     var conditionStr = "<div class='conditionContainer'>"; 
     conditionStr += 'Number of tests true must be <select><option>=</option><option>!=</option><option>&lt;</option><option>&lt;=</option><option>&gt;=</option><option>&gt;=</option></select>'
     conditionStr += ' <input type="number" value="1" min="0" style="width: 5em">'
     conditionStr += '<button type="button" class="categoryOption">Remove Condition</button><hr>'
-    
-    // Create test container
-    conditionStr += '<div class="testContainer">';
-    
-    // <select> for the first Category
-    conditionStr += "<select>";
-    for (var i = 0; i < numCategories; i++) {
-        var category = puzzle.getCategory(i);
-        conditionStr += "<option value='" + i + "'>" + category.getIdentifier() + "</option>";
-    }
-    conditionStr += "</select> ";
-    
-    // <select> for the first Category's option
-    conditionStr += "<select>";
-    for (var i = 0; i < numOptions.value; i++) {
-        option = category.getOption(i);
-        conditionStr += "<option value='" + i + "'>" + option.getIdentifier() + "</option>";
-    }
-    conditionStr += "</select> ";
-    
-    // Operation for the first item
-    conditionStr += '<input maxlength="15" size="10" placeholder="any operations"> ';
-    
-    // <select> for the test
-    conditionStr += "<select><option>is</option><option>isn't</option><option>=</option>"
-            + "<option>!=</option><option>&lt;</option><option>&lt;=</option>"
-            + "<option>&gt;=</option><option>&gt;=</option></select> ";
-    
-    // <select> for the second Category
-    conditionStr += "<select>";
-    for (var i = 0; i < numCategories; i++) {
-        var category = puzzle.getCategory(i);
-        conditionStr += "<option value='" + i + "'>" + category.getIdentifier() + "</option>";
-    }
-    conditionStr += "</select> ";
-    
-    // <select> for the second Category's option
-    conditionStr += "<select>";
-    for (var i = 0; i < numOptions.value; i++) {
-        option = category.getOption(i);
-        conditionStr += "<option value='" + i + "'>" + option.getIdentifier() + "</option>";
-    }
-    conditionStr += "</select> ";
-    
-    // Operation for the second item
-    conditionStr += '<input maxlength="15" size="10" placeholder="any operations"> ';
-    conditionStr += '<button type="button">Remove Test</button>';
-    return conditionStr + "</div></div>";
+    return conditionStr + generateTestInput() + "</div>";
+}
+
+/**
+ * Generates the HTML code for a test input
+ * @returns {string} holding the HTML code for a test
+ */
+function generateTestInput() {
+  // Create test container
+  testStr = '<div class="testContainer">';
+  
+  // <select> for the first Category
+  testStr += "<select>";
+  for (var i = 0; i < numCategories; i++) {
+      var category = puzzle.getCategory(i);
+      testStr += "<option value='" + i + "'>" + category.getIdentifier() + "</option>";
+  }
+  testStr += "</select> ";
+  
+  // <select> for the first Category's option
+  testStr += "<select>";
+  for (var i = 0; i < numOptions.value; i++) {
+      option = category.getOption(i);
+      testStr += "<option value='" + i + "'>" + option.getIdentifier() + "</option>";
+  }
+  testStr += "</select> ";
+  
+  // Operation for the first item
+  testStr += '<input maxlength="15" size="10" placeholder="any operations"> ';
+  
+  // <select> for the test
+  testStr += "<select><option>is</option><option>isn't</option><option>=</option>"
+          + "<option>!=</option><option>&lt;</option><option>&lt;=</option>"
+          + "<option>&gt;=</option><option>&gt;=</option></select> ";
+  
+  // <select> for the second Category
+  testStr += "<select>";
+  for (var i = 0; i < numCategories; i++) {
+      var category = puzzle.getCategory(i);
+      testStr += "<option value='" + i + "'>" + category.getIdentifier() + "</option>";
+  }
+  testStr += "</select> ";
+  
+  // <select> for the second Category's option
+  testStr += "<select>";
+  for (var i = 0; i < numOptions.value; i++) {
+      option = category.getOption(i);
+      testStr += "<option value='" + i + "'>" + option.getIdentifier() + "</option>";
+  }
+  testStr += "</select> ";
+  
+  // Operation for the second item
+  testStr += '<input maxlength="15" size="10" placeholder="any operations"> ';
+  testStr += '<button type="button">Remove Test</button>';
+  return testStr + "</div>";
 }
 
 /**
