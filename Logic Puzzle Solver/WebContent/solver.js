@@ -109,21 +109,80 @@
     }
     
     /**
-     * Solves the puzzle according to an array of Conditions
+     * Solves the puzzle according to an array of Conditions by brute force.
      * @param {Condition[]} conditions is an array of Condition objects
      * @returns {Entity[]} the list of entities that solves the Puzzle,
      * or null if not possible
      */
-    solve(conditions) {
+    solveBruteForce(conditions) {
+        // Create the array of blank entities
         let entities = [];
+        let optionCount = this.categories[0].numOptions();
+        for (let i = 0; i < optionCount; ++i) {
+            entities[i] = new Entity();
+        }
 
         // TODO: brute force and elegant version
         
         // TODO: create each possibility
+        catIds = []
+        this.categories.forEach(category => {
+            if (category !== null) {
+                catIds.add(category.getId());
+            }
+        });
+        return this.solveBruteForceHelper(conditions, entities, catIds, 0);
+    }
 
-        if (this._isSolved(entities)) {
-            return entities;
-        }
+    /**
+     * Helper function for solving the Puzzle with brute force (trying every
+     * possible permutation)
+     * @param {Condition[]} conditions is the array of conditions that must
+     * be satisfied by the entities
+     * @param {Entity[]} entities is the array of entities representing the
+     * potential solution
+     * @param {number[]} catIds is the array of category IDs
+     * @param {number} curId is the index of the current category ID to use
+     * @returns {Entity[]} array of entities representing the solution
+     */
+    solveBruteForceHelper(conditions, entities, catIds, curId) {
+        // Get possible permutations of option IDs for this category
+        let categoryId = catIds[curId];
+        let category = this.categories[categoryId];
+        let optionIds = [];
+        category.forEach(option => {
+            optionIds.add(option.getId());
+        })
+        // Implementation yoinked from https://stackoverflow.com/a/22063440
+        var permutations = inputArray.reduce(function permute(res, item, key, arr) {
+            return res.concat(arr.length > 1 && arr.slice(0, key).concat(arr.slice(key + 1)).reduce(permute, []).map(function(perm) { return [item].concat(perm); }) || item);
+        }, []);
+        
+        // Try each permutation
+        permutations.forEach(permutation => {
+            // Apply the permutation
+            for (let i = 0; i < entities.length; ++i) {
+                let option = category.getOption(permutation[i]);
+                entities[i].setAttribute(categoryId, option);
+            }
+
+            // Check solution OR recurse deeper to fill in other categories
+            if (curId < catIds.length) {
+                // Need to go deeper
+                solution = this.solveHelper(conditions, catIds, curId + 1,
+                                            permuations);
+                if (solution !== null) {
+                    return solution;
+                }
+            } else {
+                // Try the solution
+                if (this._isSolved(entities)) {
+                    return entities;
+                } else {
+                    return null;
+                }
+            }
+        });
 
         // Failed to solve the Puzzle
         return null;
@@ -552,7 +611,10 @@ class Test {
         switch (this.test) {
             case "is":
                 // Entity for option1 is same as entity for option2
-                return (option1.getEntity() == option2.getEntity());
+                return (option1.getEntity() === option2.getEntity());
+            case "isn't":
+                // Entity for option1 is not same as entity for option2
+                return (option1.getEntity() !== option2.getEntity());
             case "=":
                 ;
                 break;
