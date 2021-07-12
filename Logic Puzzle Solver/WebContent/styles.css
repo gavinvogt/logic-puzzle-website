@@ -1,0 +1,154 @@
+@charset "ISO-8859-1";
+
+/* Gavin Vogt */
+
+body {
+    background-color: honeydew;
+}
+
+h1 {
+    text-align: center;
+}
+
+h2.solution {
+    text-align: center;
+}
+
+h3 {
+    text-align: center;
+}
+
+table {
+    margin-left: auto;
+    margin-right: auto;
+    border-collapse: collapse;
+}
+
+td, th {
+    border: 2px solid black;
+    padding: 8px;
+    text-align: center;
+    width: auto;
+    white-space: nowrap;
+}
+
+td:hover {
+    background-color: rgba(255, 0, 0, 0.34);
+}
+
+.flexContainer {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    flex-basis: auto;
+    margin-left: 20px;
+    margin-right: 20px;
+    margin-bottom: 40px;
+}
+
+.setupDiv {
+    flex: 5;
+    min-width: 550px;
+    padding: 0px 35px 20px 35px;
+    border: 2px solid black;
+    border-radius: 25px;
+    float: left;
+    background-color: white;
+}
+
+.solutionDiv {
+    flex: 4;
+    margin-left: 20px;
+    padding: 0px 35px 35px 35px;
+    border: 2px solid black;
+    border-radius: 25px;
+    background-color: white;
+}
+
+.conditionSection {
+    
+}
+
+.categoryContainer {
+    margin-bottom: 20px;
+    padding: 10px;
+    border: 2px solid black;
+}
+
+.optionInputDiv {
+    margin-top: 10px;
+}
+
+.conditionContainer {
+    margin-bottom: 20px;
+    padding: 10px 10px 33px 10px;
+    border: 2px solid black;
+}
+
+.testContainer {
+    margin-bottom: 10px;
+    padding: 10px;
+    border: 1px solid black;
+}
+
+.categoryOption {
+    margin-left: 5px;
+    float: right;
+    transition-duration: 0.3s;
+    border-width: 0.5px;
+    border-radius: 5px;
+    padding: 3px;
+}
+
+.categoryOption:hover {
+    background-color: azure;
+}
+
+.solveButton {
+    float: right;
+    transition-duration: 0.3s;
+    background-color: palegreen;
+    border-width: 2px;
+    border-radius: 10px;
+    font-size: 1.4em;
+    margin-top: 20px;
+    padding: 10px 20px 10px 20px;
+}
+
+.solveButton:hover {
+    background-color: lawngreen;
+}
+
+.empty {
+    border: none;
+}
+
+th.catName {
+    background-color: lavender;
+    border: 3px solid black;
+    font-size: 1.25em;
+}
+
+.leftBorder {
+    border-left: 3px solid black;
+}
+
+.rightBorder {
+    border-right: 3px solid black;
+}
+
+.topBorder {
+    border-top: 3px solid black;
+}
+
+.bottomBorder {
+    border-bottom: 3px solid black;
+}
+
+span.verticalText {
+    writing-mode: vertical-lr;
+    -ms-writing-mode: tb-rl;
+    transform: rotate(180deg);
+    text-align:center;
+    display: inline-block;
+}

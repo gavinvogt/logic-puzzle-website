@@ -1,0 +1,275 @@
+<!-- Gavin Vogt -->
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Logic Puzzle Solver</title>
+<link rel="stylesheet" type="text/css" href="styles.css">
+</head>
+<body>
+
+<h1>Logic Puzzle Solver</h1>
+
+<div class="flexContainer">
+<div class="setupDiv" id="setup">
+<form onsubmit="solvePuzzle();return false;">
+<button type="submit" class="solveButton">Solve</button>
+<h2>Setup</h2>
+Number of options per category: <input type="number" id="numOptions" value="4" min="2">
+<hr>
+
+<div id="categories">
+<h3>Categories</h3>
+</div>
+
+<div class="conditionSection">
+<h3>Conditions</h3>
+<ol id="conditions">
+  <li><div class="conditionContainer">
+    Number of tests true must be <select><option>=</option>
+      <option>!=</option>
+      <option>&lt;</option>
+      <option>&lt;=</option>
+      <option>&gt;=</option>
+      <option>&gt;=</option></select>
+    <input type='number' value='1' min='0'>
+    <hr>
+    <div class="testContainer">
+    <select>
+      <option>Category 1</option>
+      <option>Category 2</option>
+      <option>Category 3</option>
+    </select>
+    <select>
+      <option>Option 1</option>
+      <option>Option 2</option>
+      <option>Option 3</option>
+    </select>
+    [operation1]
+    <select>
+      <option>is</option>
+      <option>=</option>
+      <option>!=</option>
+      <option>&lt;</option>
+      <option>&lt;=</option>
+      <option>&gt;=</option>
+      <option>&gt;=</option>
+    </select>
+    <select>
+      <option>Category 1</option>
+      <option>Category 2</option>
+      <option>Category 3</option>
+    </select>
+    <select>
+      <option>Option 1</option>
+      <option>Option 2</option>
+      <option>Option 3</option>
+    </select>
+    [operation2]
+  <button type="button">Remove Test</button>
+  </div>
+  
+    <div class="testContainer">
+    <select>
+      <option>Category 1</option>
+      <option>Category 2</option>
+      <option>Category 3</option>
+    </select>
+    <select>
+      <option>Option 1</option>
+      <option>Option 2</option>
+      <option>Option 3</option>
+    </select>
+    [operation1]
+    <select>
+      <option>is</option>
+      <option>=</option>
+      <option>!=</option>
+      <option>&lt;</option>
+      <option>&lt;=</option>
+      <option>&gt;=</option>
+      <option>&gt;=</option>
+    </select>
+    <select>
+      <option>Category 1</option>
+      <option>Category 2</option>
+      <option>Category 3</option>
+    </select>
+    <select>
+      <option>Option 1</option>
+      <option>Option 2</option>
+      <option>Option 3</option>
+    </select>
+    [operation2]
+  <button type="button">Remove Test</button>
+  </div>
+  <button type="button" class="categoryOption">Remove Condition</button>
+  </div>
+  </li>
+</ol>
+</div>
+
+<button type="submit" class="solveButton">Solve</button>
+</form>
+</div>
+
+<div class="solutionDiv" id="solution">
+<h2 class="solution">Solution</h2>
+<table id="puzzle"></table>
+</div>
+</div>
+
+<script type="text/javascript" src="solver.js"></script>
+<script>
+// Get all the important elements
+var puzzleTable = document.getElementById("puzzle");
+var numOptions = document.getElementById("numOptions");
+var categoriesDiv = document.getElementById("categories");
+var conditionsList = document.getElementById("conditions");
+var puzzle = new Puzzle();
+
+// Track various counts
+var numCategories = 4;
+var currentCategoryId = 0;
+
+// Set up the display
+setUpInputs();
+loadTable();
+
+function setUpInputs() {
+    for (var i = 0; i < numCategories; i++) {
+        addCategoryInput();
+    }
+    conditionsList.innerHTML += "<li>" + generateConditionInput() + "</li>";
+    
+}
+
+function addCategoryInput() {
+    // Add a category to the Puzzle
+    // Category input div has ID like 'category3' where 3 is the ID
+    // Category name input has ID like 'catName3' where 3 is the ID
+    puzzle.addCategory(currentCategoryId);
+    categoriesDiv.innerHTML += "<div class='categoryContainer' id='category"
+            + currentCategoryId + "'><i>Category " + puzzle.numCategories()
+            + "</i>: <input id='catName" + currentCategoryId + "' required>"
+            + "<button type='button' class='categoryOption' tabindex='-1' onclick='loadTable();'>Update Puzzle</button>"
+            + "<button type='button' class='categoryOption' tabindex='-1' onclick='loadTable();'>Remove Category</button>"
+            + "<hr><div class='optionInputDiv' id='options" + currentCategoryId
+            + "'></div></div>";
+    
+    // Add all the options to the category
+    for (var optionId = 0; optionId < numOptions.value; optionId++) {
+        addOptionInput(currentCategoryId, optionId);
+    }
+    
+    // increment currentCategoryId
+    currentCategoryId += 1;
+}
+
+function addOptionInput(categoryId, optionId) {
+    // Add an option to this Category in the Puzzle
+    // Option input has ID like 'option2,3'
+    // where 2 is the category ID and 3 is the option ID for that category
+    puzzle.getCategory(categoryId).addOption(optionId);
+    var optionsDiv = document.getElementById("options" + categoryId);
+    optionsDiv.innerHTML += "Option " + (optionId + 1) + ": <input id='option"
+            + categoryId + "," + optionId + "' required><br>";
+}
+
+function generateConditionInput() {
+    // <select> for the first Category
+    var conditionStr = "<div class='conditionContainer'><select>";
+    for (var i = 0; i < numCategories; i++) {
+        var category = puzzle.getCategory(i);
+        conditionStr += "<option value='" + i + "'>" + category.getIdentifier() + "</option>";
+    }
+    conditionStr += "</select>";
+    
+    // <select> for the first Category's option
+    conditionStr += "<select>";
+    for (var i = 0; i < numOptions.value; i++) {
+        option = category.getOption(i);
+        conditionStr += "<option value='" + i + "'>" + option.getIdentifier() + "</option>";
+    }
+    conditionStr += "</select>";
+    
+    conditionStr += "[operation1]";
+    
+    // <select> for the test
+    conditionStr += "<select><option>is</option><option>=</option>"
+            + "<option>!=</option><option>&lt;</option><option>&lt;=</option>"
+            + "<option>&gt;=</option><option>&gt;=</option></select>";
+    
+    // <select> for the second Category
+    conditionStr += "<select>";
+    for (var i = 0; i < numCategories; i++) {
+        var category = puzzle.getCategory(i);
+        conditionStr += "<option value='" + i + "'>" + category.getIdentifier() + "</option>";
+    }
+    conditionStr += "</select>";
+    
+    // <select> for the second Category's option
+    conditionStr += "<select>";
+    for (var i = 0; i < numOptions.value; i++) {
+        option = category.getOption(i);
+        conditionStr += "<option value='" + i + "'>" + option.getIdentifier() + "</option>";
+    }
+    conditionStr += "</select>";
+    
+    conditionStr += "[operation2] </div>";
+    
+    return conditionStr;
+}
+
+/**
+ * Loads the user's inputs into the Puzzle object
+ */
+function loadInputs() {
+    // Load the category / option information into the table
+    for (var categoryId = 0; categoryId < numCategories; categoryId++) {
+        // Set the category name
+        var catName = document.getElementById("catName" + categoryId);
+        var category = puzzle.getCategory(categoryId);
+        category.setName(catName.value);
+        for (var optionId = 0; optionId < numOptions.value; optionId++) {
+            // Set the option names
+            var optionInput = document.getElementById("option" + categoryId
+                    + "," + optionId);
+            var option = category.getOption(optionId);
+            option.setName(optionInput.value);
+        }
+    }
+}
+
+function loadTable() {
+    loadInputs();
+    conditionsList.innerHTML += "<li>" + generateConditionInput() + "</li>";
+    puzzleTable.innerHTML = puzzle.createHtml();
+}
+
+function solvePuzzle() {
+    // Make sure the user's inputs are valid
+    loadInputs();
+    var validity = puzzle.validate();
+    if (validity != null) {
+        // Got an error message
+        alert("Invalid input:\n" + validity);
+        return;
+    }
+    
+    // Solve the puzzle
+    var solution = puzzle.solve();
+    if (solution == null) {
+        alert("No solution found");
+    } else {
+        "<img src='images/selection_marker.png' alt='X' height='14px' width='14px'>";
+        
+        alert("Solved logic puzzle");
+    }
+}
+
+
+</script>
+
+</body>
+</html>
