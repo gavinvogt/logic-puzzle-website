@@ -111,17 +111,39 @@
     /**
      * Solves the puzzle according to an array of Conditions
      * @param {Condition[]} conditions is an array of Condition objects
-     * @returns the sparce matrix array of the solution if a solution
-     * is found, and null otherwise
+     * @returns {Entity[]} the list of entities that solves the Puzzle,
+     * or null if not possible
      */
     solve(conditions) {
-        // TODO: Will store a sparse matrix of the solution (selected boxes)
-        // category1, option1, category2, option2
-        let solution = [];
+        let entities = [];
 
         // TODO: brute force and elegant version
+        
+        // TODO: create each possibility
 
-        return solution;
+        if (this._isSolved(entities)) {
+            return entities;
+        }
+
+        // Failed to solve the Puzzle
+        return null;
+    }
+
+    /**
+     * Checks if this Puzzle is solved
+     * @param {Entity[]} entities is the array of Entity objects that
+     * attempts to solve this puzzle
+     * @returns {boolean} whether this puzzle is solved by the current
+     * arrangement
+     */
+    _isSolved(entities) {
+        this.conditions.forEach(condition => {
+            if (!condition.check(this, entities)) {
+                // Failed a condition
+                return false;
+            }
+        });
+        return true;
     }
     
     /**
@@ -318,7 +340,7 @@ class Category {
      * this option
      */
     addOption(optionId) {
-        this.options[optionId] = new Option(optionId);
+        this.options[optionId] = new Option(optionId, this);
         this.count += 1;
     }
     
@@ -369,10 +391,13 @@ class Option {
     /**
      * Constructs a new Option for a category
      * @param {number} optionId is the ID of this option
+     * @param {Category} category is the category this Option belongs to 
      */
-    constructor(optionId) {
+    constructor(optionId, category) {
         this.name = "";
+        this.category = category
         this.id = optionId;
+        this.entity = null;
     }
     
     /**
@@ -385,6 +410,14 @@ class Option {
         } else {
             return this.name;
         }
+    }
+
+    /**
+     * Gets the category this Option belongs to
+     * @returns {Category} the category this option is part of
+     */
+    getCategory() {
+        return this.category;
     }
     
     /**
@@ -414,8 +447,28 @@ class Option {
     setName(newName) {
         this.name = newName;
     }
+
+    /**
+     * Gets the entity attached to this Option
+     * @returns {Entity} entiy that possesses this Option as an attribute
+     */
+    getEntity() {
+        return this.entity;
+    }
+
+    /**
+     * Sets the Entity attached to this Option
+     * @param {Entity} entity is the entity that possesses this Option as
+     * an attribute
+     */
+    setEntity(entity) {
+        this.entity = entity;
+    }
 }
 
+/**
+ * This class represents a Condition for the puzzle solution to be valid
+ */
 class Condition {
 
     /**
@@ -431,10 +484,12 @@ class Condition {
 
     /**
      * Checks if this condition is satisfied by the puzzle
-     * @param {Puzzle} puzzle is the puzzle to check the condition on
-     * @returns {boolean} whether the puzzle satisfies the condition
+     * @param {Puzzle} puzzle is the Puzzle to check
+     * @param {Entity[]} entities is the array of Entity objects to
+     * check if they satisfy the condition
+     * @returns {boolean} whether the entities satisfy the condition
      */
-    check(puzzle) {
+    check(puzzle, entities) {
         var count = 0;
         for (var i = 0; i < this.tests.length; ++i) {
             // Check each test
@@ -442,13 +497,16 @@ class Condition {
                 // Went past the number required; stop
                 return false;
             }
-            count += this.tests[i].check(puzzle);
+            count += this.tests[i].check(puzzle, entities);
         }
         return (count == this.num);
     }
     
 }
 
+/**
+ * This class represents a single test that is part of a Condition
+ */
 class Test {
 
     /**
@@ -475,10 +533,12 @@ class Test {
 
     /**
      * Checks if the puzzle satisfies this test
-     * @param {Puzzle} puzzle is the puzzle to check the test on
+     * @param {Puzzle} puzzle is the Puzzle to check
+     * @param {Entity[]} entities is the array of Entity objects that
+     * attempts to solve the puzzle
      * @returns {number} 0 if failed, 1 if passed
      */
-    check(puzzle) {
+    check(puzzle, entities) {
         // TODO: checking if the puzzle passes the test
         let category1 = puzzle.getCategory(this.cat1);
         let option1 = category1.getOption(this.option1);
@@ -492,8 +552,7 @@ class Test {
         switch (this.test) {
             case "is":
                 // Entity for option1 is same as entity for option2
-                ;
-                break;
+                return (option1.getEntity() == option2.getEntity());
             case "=":
                 ;
                 break;
@@ -513,5 +572,42 @@ class Test {
                 ;
         }
     }
+}
+
+/**
+ * This class represents a single Entity that is part of the puzzle.
+ * The number of entities involved should be the same as the number
+ * of options per category.
+ */
+class Entity {
+
+    /**
+     * Constructs a new Entity, empty of any attibutes
+     */
+    constructor() {
+        // Array since each index corresponds to the ID of the category
+        this.attributes = [];
+    }
+
+    /**
+     * Sets an attribute for this Entity. NOTE: also updates the Option's
+     * entity as this one.
+     * @param {number} categoryId is the ID of the category
+     * @param {Option} option is the Option to set this attribute to
+     */
+    setAttribute(categoryId, option) {
+        this.attributes[categoryId] = option;
+        option.setEntity(this);
+    }
+
+    /**
+     * Gets the attribute for the given category
+     * @param {number} categoryId is the ID of the category
+     * @returns {Option} Option the attribute is set to for the given category
+     */
+    getAttribute(categoryId) {
+        return this.attributes[categoryId];
+    }
+
 }
 
