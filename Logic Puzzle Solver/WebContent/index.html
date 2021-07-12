@@ -26,6 +26,7 @@ Number of options per category: <input type="number" id="numOptions" value="4" m
 <h3>Conditions</h3>
 <ol id="conditions">
   <li><div class="conditionContainer">
+    THIS IS AN EXAMPLE (HARD-CODED) <br>
     Number of tests true must be <select><option>=</option>
       <option>!=</option>
       <option>&lt;</option>
@@ -35,73 +36,72 @@ Number of options per category: <input type="number" id="numOptions" value="4" m
     <input type='number' value='1' min='0'>
     <hr>
     <div class="testContainer">
-    <select>
-      <option>Category 1</option>
-      <option>Category 2</option>
-      <option>Category 3</option>
-    </select>
-    <select>
-      <option>Option 1</option>
-      <option>Option 2</option>
-      <option>Option 3</option>
-    </select>
-    [operation1]
-    <select>
-      <option>is</option>
-      <option>=</option>
-      <option>!=</option>
-      <option>&lt;</option>
-      <option>&lt;=</option>
-      <option>&gt;=</option>
-      <option>&gt;=</option>
-    </select>
-    <select>
-      <option>Category 1</option>
-      <option>Category 2</option>
-      <option>Category 3</option>
-    </select>
-    <select>
-      <option>Option 1</option>
-      <option>Option 2</option>
-      <option>Option 3</option>
-    </select>
-    [operation2]
-  <button type="button">Remove Test</button>
+      <select>
+        <option>Category 1</option>
+        <option>Category 2</option>
+        <option>Category 3</option>
+      </select>
+      <select>
+        <option>Option 1</option>
+        <option>Option 2</option>
+        <option>Option 3</option>
+      </select>
+      <input maxlength="15" size="10" placeholder="any operations">
+      <select>
+        <option>is</option>
+        <option>=</option>
+        <option>!=</option>
+        <option>&lt;</option>
+        <option>&lt;=</option>
+        <option>&gt;=</option>
+        <option>&gt;=</option>
+      </select>
+      <select>
+        <option>Category 1</option>
+        <option>Category 2</option>
+        <option>Category 3</option>
+      </select>
+      <select>
+        <option>Option 1</option>
+        <option>Option 2</option>
+        <option>Option 3</option>
+      </select>
+      <input maxlength="15" size="10" placeholder="any operations">
+    <button type="button">Remove Test</button>
   </div>
-  
-    <div class="testContainer">
-    <select>
-      <option>Category 1</option>
-      <option>Category 2</option>
-      <option>Category 3</option>
-    </select>
-    <select>
-      <option>Option 1</option>
-      <option>Option 2</option>
-      <option>Option 3</option>
-    </select>
-    [operation1]
-    <select>
-      <option>is</option>
-      <option>=</option>
-      <option>!=</option>
-      <option>&lt;</option>
-      <option>&lt;=</option>
-      <option>&gt;=</option>
-      <option>&gt;=</option>
-    </select>
-    <select>
-      <option>Category 1</option>
-      <option>Category 2</option>
-      <option>Category 3</option>
-    </select>
-    <select>
-      <option>Option 1</option>
-      <option>Option 2</option>
-      <option>Option 3</option>
-    </select>
-    [operation2]
-  <button type="button">Remove Test</button>
+  <div class="testContainer">
+      <select>
+        <option>Category 1</option>
+        <option>Category 2</option>
+        <option>Category 3</option>
+      </select>
+      <select>
+        <option>Option 1</option>
+        <option>Option 2</option>
+        <option>Option 3</option>
+      </select>
+      <input maxlength="15" size="10" placeholder="any operations">
+      <select>
+        <option>is</option>
+        <option>=</option>
+        <option>!=</option>
+        <option>&lt;</option>
+        <option>&lt;=</option>
+        <option>&gt;=</option>
+        <option>&gt;=</option>
+      </select>
+      <select>
+        <option>Category 1</option>
+        <option>Category 2</option>
+        <option>Category 3</option>
+      </select>
+      <select>
+        <option>Option 1</option>
+        <option>Option 2</option>
+        <option>Option 3</option>
+      </select>
+      <input maxlength="15" size="10" placeholder="any operations">
+    <button type="button">Remove Test</button>
   </div>
   <button type="button" class="categoryOption">Remove Condition</button>
   </div>
@@ -193,7 +193,8 @@ function generateConditionInput() {
     }
     conditionStr += "</select>";
     
-    conditionStr += "[operation1]";
+    // Operation for the first item
+    conditionStr += '<input maxlength="15" size="10" placeholder="any operations">';
     
     // <select> for the test
     conditionStr += "<select><option>is</option><option>=</option>"
@@ -216,9 +217,10 @@ function generateConditionInput() {
     }
     conditionStr += "</select>";
     
-    conditionStr += "[operation2] </div>";
+    // Operation for the second item
+    conditionStr += '<input maxlength="15" size="10" placeholder="any operations">';
     
-    return conditionStr;
+    return conditionStr + "</div>";
 }
 
 /**

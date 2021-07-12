@@ -480,7 +480,38 @@ class Test {
      */
     check(puzzle) {
         // TODO: checking if the puzzle passes the test
-        //if
+        let category1 = puzzle.getCategory(this.cat1);
+        let option1 = category1.getOption(this.option1);
+        // TODO: apply op1
+
+        let category2 = puzzle.getCategory(this.cat2);
+        let option2 = category2.getOption(this.option2);
+        // TODO: apply op2
+        
+        // Check if the logical test is true
+        switch (this.test) {
+            case "is":
+                // Entity for option1 is same as entity for option2
+                ;
+                break;
+            case "=":
+                ;
+                break;
+            case "!=":
+                ;
+                break;
+            case "<=":
+                ;
+                break;
+            case ">=":
+                ;
+                break;
+            case "<":
+                ;
+                break;
+            case ">":
+                ;
+        }
     }
 }
 
