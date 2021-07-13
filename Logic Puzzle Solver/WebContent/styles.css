@@ -70,7 +70,7 @@ td:hover {
 }
 
 .conditionSection {
-    
+
 }
 
 .categoryContainer {
@@ -85,7 +85,8 @@ td:hover {
 }
 
 .conditionContainer {
-    margin-bottom: 20px;
+    margin-top: 15px;
+    margin-bottom: 10px;
     padding: 12px 12px 12px 12px;
     border: 2px solid black;
 }
@@ -96,28 +97,28 @@ td:hover {
     border: 1px solid black;
 }
 
-.categoryOption {
+.internalButton {
     margin-left: 5px;
     float: right;
     transition-duration: 0.3s;
     border-width: 0.5px;
-    border-radius: 5px;
-    padding: 3px;
+    border-radius: 3px;
+    padding: 4px;
 }
 
-.categoryOption:hover {
-    background-color: azure;
+.internalButton:hover {
+    background-color: lightcoral;
 }
 
-.actionButton {
+.externalButton {
     margin-right: 5px;
     transition-duration: 0.3s;
     border-width: 0.5px;
     padding: 8px;
 }
 
-.actionButton:hover {
-    background-color: lightcoral;
+.externalButton:hover {
+    background-color: aquamarine;
 }
 
 .solveButton {

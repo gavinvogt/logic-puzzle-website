@@ -22,101 +22,16 @@ Number of options per category: <input type="number" id="numOptions" onchange="b
 <h3>Categories</h3>
 </div>
 
-<button type="button" class="actionButton" tabindex="-1" onclick="binding.addCategory();loadTable();">Add Category</button>
-<button type="button" class="actionButton" tabindex="-1" onclick="loadTable();">Update Puzzle</button>
+<button type="button" class="externalButton" tabindex="-1" onclick="binding.addCategory();loadTable();">Add Category</button>
+<button type="button" class="externalButton" tabindex="-1" onclick="loadTable();">Update Puzzle</button>
 <br>
 
 <div class="conditionSection">
-<h3>Conditions</h3>
-<ol id="conditions">
-  <li><div class="conditionContainer">
-    THIS IS AN EXAMPLE (HARD-CODED) <br>
-    Number of tests true must be <select><option>=</option>
-      <option>!=</option>
-      <option>&lt;</option>
-      <option>&lt;=</option>
-      <option>&gt;=</option>
-      <option>&gt;=</option></select>
-    <input type="number" value="1" min="0" style="width: 5em">
-    <button type="button" class="categoryOption">Remove Condition</button>
-    <hr>
-    <div class="testContainer">
-      <select>
-        <option>Category 1</option>
-        <option>Category 2</option>
-        <option>Category 3</option>
-      </select>
-      <select>
-        <option>Option 1</option>
-        <option>Option 2</option>
-        <option>Option 3</option>
-      </select>
-      <input maxlength="15" size="10" placeholder="any operations">
-      <select>
-        <option>is</option>
-        <option>isn't</option>
-        <option>=</option>
-        <option>!=</option>
-        <option>&lt;</option>
-        <option>&lt;=</option>
-        <option>&gt;=</option>
-        <option>&gt;=</option>
-      </select>
-      <select>
-        <option>Category 1</option>
-        <option>Category 2</option>
-        <option>Category 3</option>
-      </select>
-      <select>
-        <option>Option 1</option>
-        <option>Option 2</option>
-        <option>Option 3</option>
-      </select>
-      <input maxlength="15" size="10" placeholder="any operations">
-    <button type="button">Remove Test</button>
-  </div>
-  <div class="testContainer">
-      <select>
-        <option>Category 1</option>
-        <option>Category 2</option>
-        <option>Category 3</option>
-      </select>
-      <select>
-        <option>Option 1</option>
-        <option>Option 2</option>
-        <option>Option 3</option>
-      </select>
-      <input maxlength="15" size="10" placeholder="any operations">
-      <select>
-        <option>is</option>
-        <option>isn't</option>
-        <option>=</option>
-        <option>!=</option>
-        <option>&lt;</option>
-        <option>&lt;=</option>
-        <option>&gt;=</option>
-        <option>&gt;=</option>
-      </select>
-      <select>
-        <option>Category 1</option>
-        <option>Category 2</option>
-        <option>Category 3</option>
-      </select>
-      <select>
-        <option>Option 1</option>
-        <option>Option 2</option>
-        <option>Option 3</option>
-      </select>
-      <input maxlength="15" size="10" placeholder="any operations">
-    <button type="button">Remove Test</button>
-  </div>
-  </div>
-  </li>
-</ol>
+  <h3>Conditions</h3>
+  <ol id="conditions"></ol>
 </div>
 
-
-<button type="button" class="actionButton" tabindex="-1" onclick="binding.addCondition();">Add Condition</button>
+<button type="button" class="externalButton" tabindex="-1" onclick="binding.addCondition();">Add Condition</button>
 <br>
 
 <button type="submit" class="solveButton">Solve</button>
@@ -143,6 +58,7 @@ var binding = new ViewModel(puzzle);
 // Set up the display
 setUpInputs();
 loadTable();
+binding.addCondition();   // start with a single condition
 
 function setUpInputs() {
     for (var i = 0; i < numCategories; i++) {
