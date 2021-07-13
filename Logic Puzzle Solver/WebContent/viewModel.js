@@ -67,7 +67,18 @@ function getTestId(conditionId, testId) {
     return "test" + conditionId + "," + testId;
 }
 
+/**
+ * This class represents the View-Model for a category input along with
+ * all the option names
+ */
 class CategoryViewModel {
+
+    /**
+     * Constructs the View-Model for the given category
+     * @param {Puzzle} puzzle is the Puzzle to connect to
+     * @param {number} categoryId is the ID of the category that this
+     * View-Model is for
+     */
     constructor(puzzle, categoryId) {
         this.puzzle = puzzle;
         this.id = categoryId;
@@ -149,6 +160,10 @@ class CategoryViewModel {
         console.log(this.id + " " + this.optionValues);
     }
 
+    /**
+     * Fills in all the user's previously inputted values to the input
+     * fields for category name and option names
+     */
     fillInValues() {
         this.findViewElements();
         this.nameInput.value = this.catName;
@@ -308,6 +323,10 @@ class ConditionViewModel {
         return testStr + "</div>";
     }
 
+    /**
+     * Removes a test from the condition
+     * @param {number} testId is the ID of the test to remove
+     */
     removeTest(testId) {
         let newHtml = "";
         for (const tId in this.tests) {
@@ -327,6 +346,11 @@ class ConditionViewModel {
  * Puzzle solver site.
  */
 class ViewModel {
+
+    /**
+     * Constructs the overall View-Model
+     * @param {Puzzle} puzzle is the puzzle to connect to as the model
+     */
     constructor(puzzle) {
         // Get all the important elements from the view
         this.puzzleTable = document.getElementById("puzzle");
