@@ -46,6 +46,156 @@ function getOptionId(categoryId, optionId) {
     return "option" + categoryId + "," + optionId;
 }
 
+/**
+ * Creates the ID string for the given condition
+ * @param {number} conditionId is the ID of the condition
+ * @returns {string} ID for the condition input div
+ * @example getConditionId(4) - 'condition4'
+ */
+function getConditionId(conditionId) {
+    return "condition" + conditionId;
+}
+
+/**
+ * Creates the ID string for the given test
+ * @param {number} conditionId is the ID of the condition
+ * @param {number} testId is the ID of the test belonging to this condition
+ * @returns {string} ID for the test input div
+ * @example getConditionId(4, 2) - 'test4,2'
+ */
+function getTestId(conditionId, testId) {
+    return "test" + conditionId + "," + testId;
+}
+
+class FirstTestViewModel {
+    constructor(puzzle, testId, testDiv) {
+        this.puzzle = puzzle;
+        this.id = testId;
+        this.testDiv = testDiv;
+    }
+
+    getId() {
+        return this.id;
+    }
+
+    getTestElement() {
+        return this.testDiv;
+    }
+}
+
+class SecondTestViewModel {
+
+}
+
+/**
+ * This class represents the View-Model for a condition
+ */
+class ConditionViewModel {
+    constructor(puzzle, conditionId, conditionDiv) {
+        this.puzzle = puzzle;
+        this.id = conditionId;
+        this.conditionDiv = conditionDiv;
+        this.tests = {};   // {test ID : test View-Model}
+        this.currentTestId = 0;
+    }
+
+    /**
+     * Gets the div attached to this Condition
+     */
+    getConditionElement() {
+        return this.conditionDiv;
+    }
+
+    /**
+     * Adds a test to this Condition
+     */
+    addTest() {
+        this.conditionDiv.innerHTML += this._generateTestInput();
+        let testDiv = document.getElementById(getTestId(this.id, this.currentTestId));
+        this.tests[this.currentTestId] = new FirstTestViewModel(
+            this.puzzle, this.currentTestId, testDiv);
+        ++this.currentTestId;
+    }
+
+    /**
+     * Generates the HTML code for a test input
+     * @returns {string} holding the HTML code for a test
+     */
+    _generateTestInput() {
+        // Create test container
+        let testStr = '<div class="testContainer" id="'
+            + getTestId(this.id, this.currentTestId) + '">';
+        
+        // <select> for the first Category
+        testStr += "<select>";
+        this.puzzle.getCategories().forEach(category => {
+            if (category !== null) {
+                testStr += "<option value='" + category.getId() + "'>"
+                        + category.getIdentifier() + "</option>";
+            }
+        });
+        testStr += "</select> ";
+        
+        // <select> for the first Category's option
+        testStr += "<select>";
+        let firstCategory = this.puzzle.getFirstCategory();
+        firstCategory.getOptions().forEach(option => {
+            if (option !== null) {
+                testStr += "<option value='" + option.getId() + "'>"
+                        + option.getIdentifier() + "</option>";
+            }
+        });
+        testStr += "</select> ";
+        
+        // Operation for the first item
+        testStr += '<input maxlength="15" size="10" placeholder="any operations"> ';
+        
+        // <select> for the test
+        testStr += "<select><option>is</option><option>isn't</option><option>=</option>"
+                + "<option>!=</option><option>&lt;</option><option>&lt;=</option>"
+                + "<option>&gt;=</option><option>&gt;=</option></select> ";
+        
+        // <select> for the second Category
+        testStr += "<select>";
+        this.puzzle.getCategories().forEach(category => {
+            if (category !== null) {
+                testStr += "<option value='" + category.getId() + "'>"
+                        + category.getIdentifier() + "</option>";
+            }
+        });
+        testStr += "</select> ";
+        
+        // <select> for the second Category's option
+        testStr += "<select>";
+        firstCategory.getOptions().forEach(option => {
+            if (option !== null) {
+                testStr += "<option value='" + option.getId() + "'>"
+                        + option.getIdentifier() + "</option>";
+            }
+        });
+        testStr += "</select> ";
+        
+        // Operation for the second item
+        testStr += '<input maxlength="15" size="10" placeholder="any operations"> ';
+
+        // Button to remove test
+        testStr += '<button type="button" onclick="binding.removeTest('
+                + this.id + ', ' + this.currentTestId + ');">Remove Test</button>';
+        return testStr + "</div>";
+    }
+
+    removeTest(testId) {
+        let newHtml = "";
+        for (const tId in this.tests) {
+            if (testId != tId) {
+                // Keep this test
+                newHtml += this.tests[tId].getTestElement().innerHTML;
+            }
+        }
+        this.conditionDiv.innerHTML = newHtml;
+        delete this.tests[testId];
+    }
+}
 
 
 /**
@@ -53,9 +203,8 @@ function getOptionId(categoryId, optionId) {
  * Puzzle solver site.
  */
 class ViewModel {
-    constructor(document, puzzle) {
+    constructor(puzzle) {
         // Get all the important elements from the view
-        this.document = document;
         this.puzzleTable = document.getElementById("puzzle");
         this.numOptionsInput = document.getElementById("numOptions");
         this.categoriesDiv = document.getElementById("categories");
@@ -64,9 +213,18 @@ class ViewModel {
         // Components of the model
         this.puzzle = puzzle;
         this.categories = {};  // {category ID: category input element}
+        this.conditions = {};  // {condition ID: ConditionViewModel}
 
         // Counter variables
         this.currentCategoryId = 0;
+        this.currentConditionId = 0;
+    }
+
+    /**
+     * Updates the puzzle table according to the information in the Puzzle
+     */
+    updatePuzzleTable() {
+        this.puzzleTable.innerHTML = this.puzzle.createHtml();
     }
 
     /**
@@ -84,7 +242,7 @@ class ViewModel {
     addCategory() {
         this.puzzle.addCategory(this.currentCategoryId);
         this._createCategoryInput();
-        this.categories[this.currentCategoryId] = this.document.getElementById(
+        this.categories[this.currentCategoryId] = document.getElementById(
             getCategoryId(this.currentCategoryId));
         ++this.currentCategoryId;
     }
@@ -120,7 +278,7 @@ class ViewModel {
         // Add an option to this Category in the Puzzle
         puzzle.getCategory(categoryId).addOption(optionId);
         let optionIdString = getOptionId(categoryId, optionId);
-        let optionsDiv = this.document.getElementById(getOptionsId(categoryId));
+        let optionsDiv = document.getElementById(getOptionsId(categoryId));
         optionsDiv.innerHTML += "Option " + (optionId + 1) + ": <input id='"
                 + optionIdString + "' required><br>";
     }
@@ -140,6 +298,60 @@ class ViewModel {
         delete this.categories[categoryId];
 
         // TODO: remove category from puzzle
-        //this.puzzle.removeCategory(this.currentCategoryId);
+        this.puzzle.removeCategory(categoryId);
     }
+
+    /**
+     * Adds a condition to the page and updates the internal model
+     */
+    addCondition() {
+        this.conditionsList.innerHTML += "<li>" + this._generateConditionInput() + "</li>";
+        let element = document.getElementById(getConditionId(this.currentConditionId));
+        let condition = new ConditionViewModel(this.puzzle, this.currentConditionId, element);
+        condition.addTest();
+        this.conditions[this.currentConditionId] = condition;
+        ++this.currentConditionId;
+    }
+
+    /**
+     * Generates the HTML code for a Condition input
+     * @returns {string} holding the HTML code for a Condition
+     */
+    _generateConditionInput() {
+        // Create condition container
+        let conditionIdStr = getConditionId(this.currentConditionId);
+        let conditionStr = "<div class='conditionContainer' id='" + conditionIdStr
+            + "'>Number of tests true must be "
+            + '<select><option>=</option><option>!=</option><option>&lt;</option>'
+            + '<option>&lt;=</option><option>&gt;=</option><option>&gt;=</option>'
+            + '</select> <input type="number" value="1" min="0" style="width: 5em">'
+            + '<button type="button" class="categoryOption" onclick="binding.removeCondition('
+            + this.currentConditionId + ');">Remove Condition</button><hr>'
+        return conditionStr + "</div>";
+    }
+
+    /**
+     * Removes a Condition
+     * @param {number} conditionId is the ID of the condition to remove
+     */
+    removeCondition(conditionId) {
+        let newHtml = "";
+        for (const condId in this.conditions) {
+            if (conditionId != condId) {
+                // Keep this condition
+                newHtml += "<li>" + this.conditions[condId].getConditionElement().outerHTML + "</li>";
+            }
+        }this.conditionsList.innerHTML = newHtml;
+        delete this.conditions[conditionId];
+    }
+
+    /**
+     * Removes a test
+     * @param {number} conditionId is the ID of the condition
+     * @param {number} testId is the ID of the test to remove
+     */
+    removeTest(conditionId, testId) {
+        this.conditions[conditionId].removeTest(testId);
+    }
+
 }

@@ -21,6 +21,7 @@ Number of options per category: <input type="number" id="numOptions" value="4" m
 <div id="categories">
 <h3>Categories</h3>
 </div>
+
 <button type="button" class="actionButton" tabindex="-1" onclick="binding.addCategory();">Add Category</button>
 <button type="button" class="actionButton" tabindex="-1" onclick="loadTable();">Update Puzzle</button>
 <br>
@@ -114,6 +115,10 @@ Number of options per category: <input type="number" id="numOptions" value="4" m
 </ol>
 </div>
 
+
+<button type="button" class="actionButton" tabindex="-1" onclick="binding.addCondition();">Add Condition</button>
+<br>
+
 <button type="submit" class="solveButton">Solve</button>
 </form>
 </div>
@@ -134,7 +139,7 @@ var puzzle = new Puzzle();
 var numCategories = 4;
 
 // Set up the View-Model
-var binding = new ViewModel(document, puzzle);
+var binding = new ViewModel(puzzle);
 
 // Set up the display
 setUpInputs();
@@ -144,75 +149,6 @@ function setUpInputs() {
     for (var i = 0; i < numCategories; i++) {
         binding.addCategory();
     }
-    conditionsList.innerHTML += "<li>" + generateConditionInput() + "</li>";
-    
-}
-
-/**
- * Generates the HTML code for a Condition input
- * @returns {string} holding the HTML code for a Condition
- */
-function generateConditionInput() {
-    // Create condition container
-    var conditionStr = "<div class='conditionContainer'>"; 
-    conditionStr += 'Number of tests true must be <select><option>=</option><option>!=</option><option>&lt;</option><option>&lt;=</option><option>&gt;=</option><option>&gt;=</option></select>'
-    conditionStr += ' <input type="number" value="1" min="0" style="width: 5em">'
-    conditionStr += '<button type="button" class="categoryOption">Remove Condition</button><hr>'
-    return conditionStr + generateTestInput() + "</div>";
-}
-
-/**
- * Generates the HTML code for a test input
- * @returns {string} holding the HTML code for a test
- */
-function generateTestInput() {
-  // Create test container
-  testStr = '<div class="testContainer">';
-  
-  // <select> for the first Category
-  testStr += "<select>";
-  for (var i = 0; i < numCategories; i++) {
-      var category = puzzle.getCategory(i);
-      testStr += "<option value='" + i + "'>" + category.getIdentifier() + "</option>";
-  }
-  testStr += "</select> ";
-  
-  // <select> for the first Category's option
-  testStr += "<select>";
-  for (var i = 0; i < numOptions.value; i++) {
-      option = category.getOption(i);
-      testStr += "<option value='" + i + "'>" + option.getIdentifier() + "</option>";
-  }
-  testStr += "</select> ";
-  
-  // Operation for the first item
-  testStr += '<input maxlength="15" size="10" placeholder="any operations"> ';
-  
-  // <select> for the test
-  testStr += "<select><option>is</option><option>isn't</option><option>=</option>"
-          + "<option>!=</option><option>&lt;</option><option>&lt;=</option>"
-          + "<option>&gt;=</option><option>&gt;=</option></select> ";
-  
-  // <select> for the second Category
-  testStr += "<select>";
-  for (var i = 0; i < numCategories; i++) {
-      var category = puzzle.getCategory(i);
-      testStr += "<option value='" + i + "'>" + category.getIdentifier() + "</option>";
-  }
-  testStr += "</select> ";
-  
-  // <select> for the second Category's option
-  testStr += "<select>";
-  for (var i = 0; i < numOptions.value; i++) {
-      option = category.getOption(i);
-      testStr += "<option value='" + i + "'>" + option.getIdentifier() + "</option>";
-  }
-  testStr += "</select> ";
-  
-  // Operation for the second item
-  testStr += '<input maxlength="15" size="10" placeholder="any operations"> ';
-  testStr += '<button type="button">Remove Test</button>';
-  return testStr + "</div>";
 }
 
 /**
@@ -237,8 +173,7 @@ function loadInputs() {
 
 function loadTable() {
     loadInputs();
-    conditionsList.innerHTML += "<li>" + generateConditionInput() + "</li>";
-    puzzleTable.innerHTML = puzzle.createHtml();
+    binding.updatePuzzleTable();
 }
 
 function solvePuzzle() {

@@ -36,6 +36,11 @@
         this.count += 1;
     }
 
+    /**
+     * Removes a category from the Puzzle
+     * @param {number} categoryId is the integer identifying the ID of
+     * this category
+     */
     removeCategory(categoryId) {
         delete this.categories[categoryId];
         this.count -= 1;
@@ -60,6 +65,21 @@
      */
     getCategory(categoryId) {
         return this.categories[categoryId];
+    }
+
+    /**
+     * Gets the first category in the Puzzle (ID ordering)
+     * @return {Category} the first Category in the Puzzle
+     */
+    getFirstCategory() {
+        for (let i = 0, n = this.categories.length; i < n; ++i) {
+            let category = this.categories[i];
+            if (category !== null) {
+                // Found the first category
+                return category;
+            }
+        }
+        return null;
     }
     
     /**
