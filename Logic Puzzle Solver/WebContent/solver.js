@@ -239,14 +239,16 @@
         
         // Add empty box and top layer of headings to the table
         let retStr = "<tr><th class='empty' rowspan='2' colspan='2'></th>";
-        this.categories.forEach(category => {
+        for (let i = 1; i < this.numCategories(); i++) {
+            let category = this.categories[i];
             if (category !== null) {
                 retStr += "<th class='catName' colspan='" + numOptions + "'>"
                     + category.getName() + "</th>";
             }
-        })
+        }
         retStr += "</tr><tr>";
-        this.categories.forEach(category => {
+        for (let i = 1; i < this.numCategories(); i++) {
+            let category = this.categories[i];
             if (category !== null) {
                 for (let optionId = 0; optionId < numOptions; ++optionId) {
                     let option = category.getOption(optionId);
@@ -261,7 +263,7 @@
                             + option.getName() + "</span></th>";
                 }
             }
-        })
+        }
         retStr += "</tr>";
         
         // Add the first category (this.categories[0])
