@@ -21,6 +21,9 @@ Number of options per category: <input type="number" id="numOptions" value="4" m
 <div id="categories">
 <h3>Categories</h3>
 </div>
+<button type="button" class="actionButton" tabindex="-1" onclick="binding.addCategory();">Add Category</button>
+<button type="button" class="actionButton" tabindex="-1" onclick="loadTable();">Update Puzzle</button>
+<br>
 
 <div class="conditionSection">
 <h3>Conditions</h3>
@@ -122,17 +125,16 @@ Number of options per category: <input type="number" id="numOptions" value="4" m
 </div>
 
 <script type="text/javascript" src="solver.js"></script>
+<script type="text/javascript" src="viewModel.js"></script>
 <script>
-// Get all the important elements
-var puzzleTable = document.getElementById("puzzle");
-var numOptions = document.getElementById("numOptions");
-var categoriesDiv = document.getElementById("categories");
-var conditionsList = document.getElementById("conditions");
+
 var puzzle = new Puzzle();
 
 // Track various counts
 var numCategories = 4;
-var currentCategoryId = 0;
+
+// Set up the View-Model
+var binding = new ViewModel(document, puzzle);
 
 // Set up the display
 setUpInputs();
@@ -140,42 +142,10 @@ loadTable();
 
 function setUpInputs() {
     for (var i = 0; i < numCategories; i++) {
-        addCategoryInput();
+        binding.addCategory();
     }
     conditionsList.innerHTML += "<li>" + generateConditionInput() + "</li>";
     
-}
-
-function addCategoryInput() {
-    // Add a category to the Puzzle
-    // Category input div has ID like 'category3' where 3 is the ID
-    // Category name input has ID like 'catName3' where 3 is the ID
-    puzzle.addCategory(currentCategoryId);
-    categoriesDiv.innerHTML += "<div class='categoryContainer' id='category"
-            + currentCategoryId + "'><i>Category " + puzzle.numCategories()
-            + "</i>: <input id='catName" + currentCategoryId + "' required>"
-            + "<button type='button' class='categoryOption' tabindex='-1' onclick='loadTable();'>Update Puzzle</button>"
-            + "<button type='button' class='categoryOption' tabindex='-1' onclick='loadTable();'>Remove Category</button>"
-            + "<hr><div class='optionInputDiv' id='options" + currentCategoryId
-            + "'></div></div>";
-    
-    // Add all the options to the category
-    for (var optionId = 0; optionId < numOptions.value; optionId++) {
-        addOptionInput(currentCategoryId, optionId);
-    }
-    
-    // increment currentCategoryId
-    currentCategoryId += 1;
-}
-
-function addOptionInput(categoryId, optionId) {
-    // Add an option to this Category in the Puzzle
-    // Option input has ID like 'option2,3'
-    // where 2 is the category ID and 3 is the option ID for that category
-    puzzle.getCategory(categoryId).addOption(optionId);
-    var optionsDiv = document.getElementById("options" + categoryId);
-    optionsDiv.innerHTML += "Option " + (optionId + 1) + ": <input id='option"
-            + categoryId + "," + optionId + "' required><br>";
 }
 
 /**
@@ -250,12 +220,12 @@ function generateTestInput() {
  */
 function loadInputs() {
     // Load the category / option information into the table
-    for (var categoryId = 0; categoryId < numCategories; categoryId++) {
+    for (var categoryId = 0; categoryId < numCategories; ++categoryId) {
         // Set the category name
         var catName = document.getElementById("catName" + categoryId);
         var category = puzzle.getCategory(categoryId);
         category.setName(catName.value);
-        for (var optionId = 0; optionId < numOptions.value; optionId++) {
+        for (var optionId = 0; optionId < numOptions.value; ++optionId) {
             // Set the option names
             var optionInput = document.getElementById("option" + categoryId
                     + "," + optionId);

@@ -70,7 +70,8 @@ td:hover {
 }
 
 .categoryContainer {
-    margin-bottom: 20px;
+    margin-top: 15px;
+    margin-bottom: 10px;
     padding: 10px;
     border: 2px solid black;
 }
@@ -102,6 +103,16 @@ td:hover {
 
 .categoryOption:hover {
     background-color: azure;
+}
+
+.actionButton {
+    transition-duration: 0.3s;
+    border-width: 0.5px;
+    padding: 8px;
+}
+
+.actionButton:hover {
+    background-color: lightcoral;
 }
 
 .solveButton {

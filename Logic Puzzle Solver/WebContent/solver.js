@@ -35,6 +35,11 @@
         this.categories[categoryId] = new Category(categoryId);
         this.count += 1;
     }
+
+    removeCategory(categoryId) {
+        delete this.categories[categoryId];
+        this.count -= 1;
+    }
     
     /**
      * Edits a category name by category ID
@@ -214,26 +219,29 @@
         
         // Add empty box and top layer of headings to the table
         let retStr = "<tr><th class='empty' rowspan='2' colspan='2'></th>";
-        for (let i = 1; i < this.numCategories(); i++) {
-            retStr += "<th class='catName' colspan='" + numOptions + "'>"
-                    + this.categories[i].getName() + "</th>";
-        }
-        retStr += "</tr><tr>";
-        for (let i = 1; i < this.numCategories(); i++) {
-            for (var optionId = 0; optionId < numOptions; optionId++) {
-                let option = this.categories[i].getOption(optionId);
-                if (option.getId() === 0) {
-                    retStr += "<th class='leftBorder'>";
-                } else if (option.getId() === numOptions - 1) {
-                    retStr += "<th class='rightBorder'>";
-                } else {
-                    retStr += "<th>";
-                }
-                
-                retStr += "<span class='verticalText'>"
-                        + option.getName() + "</span></th>";
+        this.categories.forEach(category => {
+            if (category !== null) {
+                retStr += "<th class='catName' colspan='" + numOptions + "'>"
+                    + category.getName() + "</th>";
             }
-        }
+        })
+        retStr += "</tr><tr>";
+        this.categories.forEach(category => {
+            if (category !== null) {
+                for (let optionId = 0; optionId < numOptions; ++optionId) {
+                    let option = category.getOption(optionId);
+                    if (option.getId() === 0) {
+                        retStr += "<th class='leftBorder'>";
+                    } else if (option.getId() === numOptions - 1) {
+                        retStr += "<th class='rightBorder'>";
+                    } else {
+                        retStr += "<th>";
+                    }
+                    retStr += "<span class='verticalText'>"
+                            + option.getName() + "</span></th>";
+                }
+            }
+        })
         retStr += "</tr>";
         
         // Add the first category (this.categories[0])
