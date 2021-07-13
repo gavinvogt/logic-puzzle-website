@@ -15,14 +15,14 @@
 <form onsubmit="solvePuzzle();return false;">
 <button type="submit" class="solveButton">Solve</button>
 <h2>Setup</h2>
-Number of options per category: <input type="number" id="numOptions" value="4" min="2">
+Number of options per category: <input type="number" id="numOptions" onchange="binding.updateNumOptions();" value="4" min="2">
 <hr>
 
 <div id="categories">
 <h3>Categories</h3>
 </div>
 
-<button type="button" class="actionButton" tabindex="-1" onclick="binding.addCategory();">Add Category</button>
+<button type="button" class="actionButton" tabindex="-1" onclick="binding.addCategory();loadTable();">Add Category</button>
 <button type="button" class="actionButton" tabindex="-1" onclick="loadTable();">Update Puzzle</button>
 <br>
 
@@ -132,11 +132,10 @@ Number of options per category: <input type="number" id="numOptions" value="4" m
 <script type="text/javascript" src="solver.js"></script>
 <script type="text/javascript" src="viewModel.js"></script>
 <script>
-
 var puzzle = new Puzzle();
 
 // Track various counts
-var numCategories = 4;
+var numCategories = 3;
 
 // Set up the View-Model
 var binding = new ViewModel(puzzle);
@@ -151,34 +150,14 @@ function setUpInputs() {
     }
 }
 
-/**
- * Loads the user's inputs into the Puzzle object
- */
-function loadInputs() {
-    // Load the category / option information into the table
-    for (var categoryId = 0; categoryId < numCategories; ++categoryId) {
-        // Set the category name
-        var catName = document.getElementById("catName" + categoryId);
-        var category = puzzle.getCategory(categoryId);
-        category.setName(catName.value);
-        for (var optionId = 0; optionId < numOptions.value; ++optionId) {
-            // Set the option names
-            var optionInput = document.getElementById("option" + categoryId
-                    + "," + optionId);
-            var option = category.getOption(optionId);
-            option.setName(optionInput.value);
-        }
-    }
-}
-
 function loadTable() {
-    loadInputs();
+    binding.loadNamingInputs();
     binding.updatePuzzleTable();
 }
 
 function solvePuzzle() {
     // Make sure the user's inputs are valid
-    loadInputs();
+    binding.loadNamingInputs();
     var validity = puzzle.validate();
     if (validity != null) {
         // Got an error message

@@ -11,7 +11,8 @@
   * Represents a logic puzzle to solve
   * Useful methods include:
   *     addCategory()
-  *     getCategory()
+  *     getCategoryById()
+  *     getCategoryByIndex()
   *     createHtml()
   *     solve()
   */
@@ -21,9 +22,7 @@
      * Constructs a new Puzzle
      */
     constructor() {
-        // Keep track of the categories, by both ID and name
         this.categories = [];
-        this.count = 0;
     }
     
     /**
@@ -32,18 +31,26 @@
      * this category
      */
     addCategory(categoryId) {
-        this.categories[categoryId] = new Category(categoryId);
-        this.count += 1;
+        this.categories.push(new Category(categoryId));
     }
 
     /**
-     * Removes a category from the Puzzle
+     * Removes a category from the Puzzle by ID
      * @param {number} categoryId is the integer identifying the ID of
      * this category
      */
-    removeCategory(categoryId) {
-        delete this.categories[categoryId];
-        this.count -= 1;
+    removeCategoryById(categoryId) {
+        let index = this.categories.findIndex(cat => cat.getId() === categoryId);
+        this.removeCategoryByIndex(index);
+    }
+
+    /**
+     * Removes a category from the Puzzle by index
+     * @param {number} categoryIndex is the integer identifying the index of
+     * this category
+     */
+    removeCategoryByIndex(categoryIndex) {
+        this.categories.splice(categoryIndex, 1);
     }
     
     /**
@@ -63,23 +70,17 @@
      * @param {number} categoryId is the ID of the category to get
      * @returns {Category} the Category with matching ID
      */
-    getCategory(categoryId) {
-        return this.categories[categoryId];
+    getCategoryById(categoryId) {
+        return this.categories.find(cat => cat.getId() === categoryId);
     }
 
     /**
-     * Gets the first category in the Puzzle (ID ordering)
-     * @return {Category} the first Category in the Puzzle
+     * Gets a category in the Puzzle by index
+     * @param {number} categoryId is the index of the category to get
+     * @returns {Category} the Category with matching index
      */
-    getFirstCategory() {
-        for (let i = 0, n = this.categories.length; i < n; ++i) {
-            let category = this.categories[i];
-            if (category !== null) {
-                // Found the first category
-                return category;
-            }
-        }
-        return null;
+    getCategoryByIndex(categoryIndex) {
+        return this.categories[categoryIndex];
     }
     
     /**
@@ -95,7 +96,17 @@
      * @returns {number} integer number of categories in the Puzzle
      */
     numCategories() {
-        return this.count;
+        return this.categories.length;
+    }
+
+    /**
+     * Sets the number of options per category
+     * @param {number} numOptions is the new number of options per category
+     */
+    setNumOptions(numOptions) {
+        this.categories.forEach(category => {
+            category.setNumOptions(numOptions);
+        });
     }
     
     /**
@@ -105,7 +116,7 @@
     validate() {
         let usedCategories = new Set();
         let usedOptions = new Set();
-        for (let i = 0; i < this.categories.length; i++) {
+        for (let i = 0; i < this.categories.length; ++i) {
             // Make sure the category name is not a duplicate
             let category = this.categories[i];
             if (usedCategories.has(category.getName())) {
@@ -117,7 +128,7 @@
             // Make sure the option names are not duplicates for this category
             usedOptions.clear();
             let options = category.getOptions();
-            for (let j = 0; j < options.length; j++) {
+            for (let j = 0; j < options.length; ++j) {
                 // Make sure the option name is not a duplicate
                 let option = options[j];
                 if (usedOptions.has(option.getName())) {
@@ -150,13 +161,8 @@
         // TODO: brute force and elegant version
         
         // TODO: create each possibility
-        catIds = []
-        this.categories.forEach(category => {
-            if (category !== null) {
-                catIds.add(category.getId());
-            }
-        });
-        return this.solveBruteForceHelper(conditions, entities, catIds, 0);
+        catIndices = [...this.categories.keys()];
+        return this.solveBruteForceHelper(conditions, entities, catIndices, 0);
     }
 
     /**
@@ -166,20 +172,20 @@
      * be satisfied by the entities
      * @param {Entity[]} entities is the array of entities representing the
      * potential solution
-     * @param {number[]} catIds is the array of category IDs
-     * @param {number} curId is the index of the current category ID to use
+     * @param {number[]} catIndices is the array of category indices
+     * @param {number} curIndex is the index of the current category index to use
      * @returns {Entity[]} array of entities representing the solution
      */
-    solveBruteForceHelper(conditions, entities, catIds, curId) {
+    solveBruteForceHelper(conditions, entities, catIndices, curIndex) {
         // Get possible permutations of option IDs for this category
-        let categoryId = catIds[curId];
-        let category = this.categories[categoryId];
+        let category = this.categories[curIndex];
+        let categoryId = category.getId();
         let optionIds = [];
         category.forEach(option => {
             optionIds.add(option.getId());
         })
         // Implementation yoinked from https://stackoverflow.com/a/22063440
-        var permutations = inputArray.reduce(function permute(res, item, key, arr) {
+        var permutations = catIndices.reduce(function permute(res, item, key, arr) {
             return res.concat(arr.length > 1 && arr.slice(0, key).concat(arr.slice(key + 1)).reduce(permute, []).map(function(perm) { return [item].concat(perm); }) || item);
         }, []);
         
@@ -192,9 +198,9 @@
             }
 
             // Check solution OR recurse deeper to fill in other categories
-            if (curId < catIds.length) {
+            if (curIndex < catIndices.length) {
                 // Need to go deeper
-                solution = this.solveHelper(conditions, catIds, curId + 1,
+                solution = this.solveHelper(conditions, catIndices, curIndex + 1,
                                             permuations);
                 if (solution !== null) {
                     return solution;
@@ -239,29 +245,25 @@
         
         // Add empty box and top layer of headings to the table
         let retStr = "<tr><th class='empty' rowspan='2' colspan='2'></th>";
-        for (let i = 1; i < this.numCategories(); i++) {
+        for (let i = 1; i < this.numCategories(); ++i) {
             let category = this.categories[i];
-            if (category !== null) {
-                retStr += "<th class='catName' colspan='" + numOptions + "'>"
-                    + category.getName() + "</th>";
-            }
+            retStr += "<th class='catName' colspan='" + numOptions + "'>"
+                   + category.getName() + "</th>";
         }
         retStr += "</tr><tr>";
-        for (let i = 1; i < this.numCategories(); i++) {
+        for (let i = 1; i < this.numCategories(); ++i) {
             let category = this.categories[i];
-            if (category !== null) {
-                for (let optionId = 0; optionId < numOptions; ++optionId) {
-                    let option = category.getOption(optionId);
-                    if (option.getId() === 0) {
-                        retStr += "<th class='leftBorder'>";
-                    } else if (option.getId() === numOptions - 1) {
-                        retStr += "<th class='rightBorder'>";
-                    } else {
-                        retStr += "<th>";
-                    }
-                    retStr += "<span class='verticalText'>"
-                            + option.getName() + "</span></th>";
+            for (let optionId = 0; optionId < numOptions; ++optionId) {
+                let option = category.getOption(optionId);
+                if (option.getId() === 0) {
+                    retStr += "<th class='leftBorder'>";
+                } else if (option.getId() === numOptions - 1) {
+                    retStr += "<th class='rightBorder'>";
+                } else {
+                    retStr += "<th>";
                 }
+                retStr += "<span class='verticalText'>"
+                        + option.getName() + "</span></th>";
             }
         }
         retStr += "</tr>";
@@ -273,11 +275,11 @@
         }
         
         // Work backwards from the last category ID to 3
-        for (let leftCategoryId = this.numCategories() - 1; leftCategoryId >= 2;
-                leftCategoryId--) {
+        for (let leftCategoryIndex = this.numCategories() - 1; leftCategoryIndex >= 2;
+                leftCategoryIndex--) {
             for (let leftOptionId = 0; leftOptionId < numOptions; leftOptionId++) {
                 // leftOptionId = ID of the option on the left bar
-                retStr += this._getTableRow(leftCategoryId, leftOptionId, numOptions);
+                retStr += this._getTableRow(leftCategoryIndex, leftOptionId, numOptions);
             }
         }
         
@@ -287,15 +289,15 @@
     /**
      * Gets the HTML for a single row in the table. Automatically
      * applies border widths and disregards redundant cells
-     * @param {number} leftCategoryId is the ID of the category in the
+     * @param {number} leftCategoryIndex is the index of the category in the
      * left heading bar of the puzzle table
      * @param {number} leftOptionId is the ID of the option for the
      * provided category in the left side of the table
      * @param {number} numOptions is the number of options
      * @returns {string} HTML code for a row in the table
      */
-    _getTableRow(leftCategoryId, leftOptionId, numOptions) {
-        let category = this.categories[leftCategoryId];
+    _getTableRow(leftCategoryIndex, leftOptionId, numOptions) {
+        let category = this.categories[leftCategoryIndex];
         let option = category.getOption(leftOptionId);
         let rowStr = "<tr>";
         if (leftOptionId === 0) {
@@ -311,10 +313,10 @@
             rowStr += "<th>" + option.getName() + "</th>";
         }
         let topCategoryId = 1;
-        while (topCategoryId < this.numCategories() && topCategoryId != leftCategoryId) {
+        while (topCategoryId < this.numCategories() && topCategoryId != leftCategoryIndex) {
             for (let topOptionId = 0; topOptionId < numOptions; topOptionId++) {
                 // ID string: "{leftCat},{leftOption},{topCat},{topOption}"
-                let idStr = leftCategoryId + "," + leftOptionId + ","
+                let idStr = leftCategoryIndex + "," + leftOptionId + ","
                         + topCategoryId + "," + topOptionId;
                 let classStr = this._getLocationClass(leftOptionId, topOptionId,
                         numOptions);
@@ -425,12 +427,49 @@ class Category {
     
     /**
      * Adds an option to the Category
-     * @param {number} optionId is the integer identifying the ID of
-     * this option
+     * @returns {Option} new option that was created
      */
-    addOption(optionId) {
-        this.options[optionId] = new Option(optionId, this);
-        this.count += 1;
+    addOption() {
+        let newOption = new Option(this.count, this);
+        this.options[this.count] = newOption;
+        ++this.count;
+        return newOption;
+    }
+
+    /**
+     * Removes the last option in this Category
+     */
+    removeOption() {
+        this.options.splice(-1, 1);
+        --this.count;
+    }
+
+    /**
+     * Sets the number of options for this Category
+     * @param {number} numOptions is the new number of options in this category
+     */
+    setNumOptions(numOptions) {
+        let numToAdd = numOptions - this.count;
+        if (numToAdd > 0) {
+            // Adding options
+            var action = function(cat) {
+                cat.addOption();
+            }
+        } else if (numToAdd < 0) {
+            // Removing options
+            numToAdd = -numToAdd
+            var action = function(cat) {
+                cat.removeOption();
+            }
+        } else {
+            // Don't need to do anything
+            return;
+        }
+
+        // Perform the actions
+        for (let i = 0; i < numToAdd; ++i) {
+            action(this);
+        }
     }
     
     /**
@@ -629,11 +668,11 @@ class Test {
      */
     check(puzzle, entities) {
         // TODO: checking if the puzzle passes the test
-        let category1 = puzzle.getCategory(this.cat1);
+        let category1 = puzzle.getCategoryById(this.cat1);
         let option1 = category1.getOption(this.option1);
         // TODO: apply op1
 
-        let category2 = puzzle.getCategory(this.cat2);
+        let category2 = puzzle.getCategoryById(this.cat2);
         let option2 = category2.getOption(this.option2);
         // TODO: apply op2
         

@@ -67,6 +67,131 @@ function getTestId(conditionId, testId) {
     return "test" + conditionId + "," + testId;
 }
 
+class CategoryViewModel {
+    constructor(puzzle, categoryId) {
+        this.puzzle = puzzle;
+        this.id = categoryId;
+        this.saveValues();    // Finds all the view elements and saves values
+    }
+
+    /**
+     * Gets the ID of this category
+     * @returns {number} ID of the category
+     */
+    getId() {
+        return this.id;
+    }
+
+    /**
+     * Gets the category div that makes up the View
+     */
+    getCategoryDiv() {
+        return this.categoryDiv;
+    }
+
+    /**
+     * Finds the necessary elements in the view
+     */
+    findViewElements() {
+        this.categoryDiv = document.getElementById(getCategoryId(this.id));
+        this.optionsDiv = document.getElementById(getOptionsId(this.id));
+        this._findInputs();
+    }
+
+    /**
+     * Finds all the option name inputs for this category
+     */
+    _findInputs() {
+        this.nameInput = document.getElementById(getCategoryNameId(this.id));
+        this.optionInputs = [...this.optionsDiv.getElementsByTagName("input")];
+    }
+
+    /**
+     * Sets the number of options in the category view (does not update model)
+     * @param {number} numOptions is the new number of options in the Category
+     * View-Model
+     */
+    setNumOptions(numOptions) {
+        // Save the old option input values
+        console.log("doing it for category " + this.id);
+        this.saveValues();
+
+        // Replace inner HTML of category div with new number of option inputs
+        this.optionsDiv.innerHTML = "";
+        for (let i = 0; i < numOptions; ++i) {
+            this._addOptionInput(i);
+        }
+
+        // Insert the previous values
+        this.fillInValues();
+    }
+
+    /**
+     * Adds an option to both the Puzzle model and the View. SHOULD ONLY
+     * BE USED WHILE SETTING UP THE CATEGORY FOR THE FIRST TIME
+     */
+    addOption() {
+        let newOption = this.puzzle.getCategoryById(this.id).addOption();
+        this._addOptionInput(newOption.getId());
+        this._findInputs();
+    }
+    
+    /**
+     * Saves the inputted option values in `catName` and `optionValues` fields
+     */
+    saveValues() {
+        this.findViewElements();
+        this.catName = this.nameInput.value;
+        this.optionValues = [];
+        this.optionInputs.forEach(input => {
+            this.optionValues.push(input.value);
+        })
+    }
+
+    fillInValues() {
+        console.log("filling in values for " + this.id);
+        this.findViewElements();
+        this.nameInput.value = this.catName;
+        let n = (this.optionValues.length < this.optionInputs.length)
+                ? this.optionValues.length : this.optionInputs.length;
+        for (let i = 0; i < n; ++i) {
+            this.optionInputs[i].value = this.optionValues[i];
+            console.log("option " + i + " : " + this.optionValues[i]);
+        }
+    }
+
+    /**
+     * Reads the category name the user inputted
+     * @returns {string} category name
+     */
+    readName() {
+        return this.nameInput.value;
+    }
+
+    /**
+     * Reads the option names the user inputted for this category
+     * @returns {string[]} array of option names (indexed by option ID)
+     */
+    readOptionNames() {
+        let optionNames = [];
+        optionNames.forEach(input => {
+            optionNames.push(input.value);
+        })
+        return optionNames;
+    }
+
+    /**
+     * Adds an option input field to this category
+     */
+    _addOptionInput(optionId) {
+        // Add an option to this Category in the Puzzle
+        let optionIdString = getOptionId(this.id, optionId);
+        this.optionsDiv.innerHTML += "Option " + (optionId + 1) + ": <input id='"
+                + optionIdString + "' required><br>";
+    }
+
+}
+
 class FirstTestViewModel {
     constructor(puzzle, testId, testDiv) {
         this.puzzle = puzzle;
@@ -100,6 +225,14 @@ class ConditionViewModel {
     }
 
     /**
+     * Gets the ID of the condition
+     * @returns {number} ID of the condition
+     */
+    getId() {
+        return this.id;
+    }
+
+    /**
      * Gets the div attached to this Condition
      */
     getConditionElement() {
@@ -129,21 +262,17 @@ class ConditionViewModel {
         // <select> for the first Category
         testStr += "<select>";
         this.puzzle.getCategories().forEach(category => {
-            if (category !== null) {
-                testStr += "<option value='" + category.getId() + "'>"
-                        + category.getIdentifier() + "</option>";
-            }
+            testStr += "<option value='" + category.getId() + "'>"
+                    + category.getIdentifier() + "</option>";
         });
         testStr += "</select> ";
         
         // <select> for the first Category's option
         testStr += "<select>";
-        let firstCategory = this.puzzle.getFirstCategory();
+        let firstCategory = this.puzzle.getCategoryByIndex(0);
         firstCategory.getOptions().forEach(option => {
-            if (option !== null) {
-                testStr += "<option value='" + option.getId() + "'>"
-                        + option.getIdentifier() + "</option>";
-            }
+            testStr += "<option value='" + option.getId() + "'>"
+                    + option.getIdentifier() + "</option>";
         });
         testStr += "</select> ";
         
@@ -158,20 +287,16 @@ class ConditionViewModel {
         // <select> for the second Category
         testStr += "<select>";
         this.puzzle.getCategories().forEach(category => {
-            if (category !== null) {
-                testStr += "<option value='" + category.getId() + "'>"
-                        + category.getIdentifier() + "</option>";
-            }
+            testStr += "<option value='" + category.getId() + "'>"
+                    + category.getIdentifier() + "</option>";
         });
         testStr += "</select> ";
         
         // <select> for the second Category's option
         testStr += "<select>";
         firstCategory.getOptions().forEach(option => {
-            if (option !== null) {
-                testStr += "<option value='" + option.getId() + "'>"
-                        + option.getIdentifier() + "</option>";
-            }
+            testStr += "<option value='" + option.getId() + "'>"
+                    + option.getIdentifier() + "</option>";
         });
         testStr += "</select> ";
         
@@ -212,12 +337,31 @@ class ViewModel {
 
         // Components of the model
         this.puzzle = puzzle;
-        this.categories = {};  // {category ID: category input element}
-        this.conditions = {};  // {condition ID: ConditionViewModel}
+        this.categories = new Map();  // {category ID: CategoryViewModel}
+        this.conditions = new Map();  // {condition ID: ConditionViewModel}
 
         // Counter variables
         this.currentCategoryId = 0;
         this.currentConditionId = 0;
+    }
+
+    /**
+     * Loads all the category / option name inputs into the Puzzle
+     */
+    loadNamingInputs() {
+        // Load the category / option information into the table
+        puzzle.getCategories().forEach(category => {
+            // Get the data from the categoryVM
+            let categoryVM = this.categories.get(category.getId());
+            category.setName(categoryVM.readName());
+
+            // Update the option names
+            let options = category.getOptions();
+            let optionNames = categoryVM.readOptionNames();
+            for (let i = 0, n = options.length; i < n; ++i) {
+                options[i].setName(optionNames[i]);
+            }
+        });
     }
 
     /**
@@ -236,51 +380,60 @@ class ViewModel {
     }
 
     /**
+     * Updates the number of options per category using the new value
+     * of the `numOptions` element
+     */
+    updateNumOptions() {
+        let newNum = this.getNumOptions();
+        puzzle.setNumOptions(newNum);
+        for (const categoryVM of this.categories.values()) {
+            categoryVM.setNumOptions(newNum);
+        }
+    }
+
+    /**
      * Adds a category to the View and Model and increments the category ID
      * for the next time one is added
      */
     addCategory() {
+        // Save the input values
+        for (const categoryVM of this.categories.values()) {
+            categoryVM.saveValues();
+        }
+
         this.puzzle.addCategory(this.currentCategoryId);
         this._createCategoryInput();
-        this.categories[this.currentCategoryId] = document.getElementById(
-            getCategoryId(this.currentCategoryId));
+        let categoryVM = new CategoryViewModel(puzzle, this.currentCategoryId);
+        this.categories.set(this.currentCategoryId, categoryVM);
+        
+        // Add all the options to the category
+        for (let i = 0, n = this.getNumOptions(); i < n; ++i) {
+            categoryVM.addOption();
+        }
         ++this.currentCategoryId;
+
+        // Fill the values back into the view
+        for (const categoryVM of this.categories.values()) {
+            categoryVM.fillInValues();
+        }
     }
 
     /**
-     * Creates the category input HTML string and adds it to the Categories div
+     * Creates the category input HTML string and adds it to the Categories div.
+     * Uses the current category ID.
      */
     _createCategoryInput() {
         let catIdString = getCategoryId(this.currentCategoryId);
         let catNameIdString = getCategoryNameId(this.currentCategoryId);
         let optionsIdString = getOptionsId(this.currentCategoryId);
         this.categoriesDiv.innerHTML += "<div class='categoryContainer' id='"
-            + catIdString + "'><i>Category " + puzzle.numCategories()
+            + catIdString + "'><i>Category " + (this.currentCategoryId + 1)
             + "</i>: <input id='" + catNameIdString + "' required>"
             + "<button type='button' class='categoryOption' tabindex='-1' "
             + "onclick='binding.removeCategory(" + this.currentCategoryId
-            + ");'>Remove Category</button>"
+            + ");loadTable();'>Remove Category</button>"
             + "<hr><div class='optionInputDiv' id='" + optionsIdString
             + "'></div></div>";
-        
-        // Add all the options to the category
-        for (let optionId = 0, n = this.getNumOptions(); optionId < n; optionId++) {
-            this._addOptionInput(this.currentCategoryId, optionId);
-        }
-    }
-
-    /**
-     * Adds an option input field to the given category
-     * @param {number} categoryId is the ID of the category
-     * @param {number} optionId is the ID of the option for this category
-     */
-    _addOptionInput(categoryId, optionId) {
-        // Add an option to this Category in the Puzzle
-        puzzle.getCategory(categoryId).addOption(optionId);
-        let optionIdString = getOptionId(categoryId, optionId);
-        let optionsDiv = document.getElementById(getOptionsId(categoryId));
-        optionsDiv.innerHTML += "Option " + (optionId + 1) + ": <input id='"
-                + optionIdString + "' required><br>";
     }
 
     /**
@@ -289,16 +442,20 @@ class ViewModel {
      */
     removeCategory(categoryId) {
         let newHtml = ""
-        for (const catId in this.categories) {
-            if (categoryId != catId) {
-                newHtml += this.categories[catId].outerHTML;
+        for (const categoryVM of this.categories.values()) {
+            categoryVM.saveValues();
+            if (categoryId != categoryVM.getId()) {
+                newHtml += categoryVM.getCategoryDiv().outerHTML;
             }
         }
         this.categoriesDiv.innerHTML = newHtml;
-        delete this.categories[categoryId];
+        this.categories.delete(categoryId);
+        this.puzzle.removeCategoryById(categoryId);
 
-        // TODO: remove category from puzzle
-        this.puzzle.removeCategory(categoryId);
+        // Fill the values back into the view
+        for (const categoryVM of this.categories.values()) {
+            categoryVM.fillInValues();
+        }
     }
 
     /**
@@ -307,9 +464,9 @@ class ViewModel {
     addCondition() {
         this.conditionsList.innerHTML += "<li>" + this._generateConditionInput() + "</li>";
         let element = document.getElementById(getConditionId(this.currentConditionId));
-        let condition = new ConditionViewModel(this.puzzle, this.currentConditionId, element);
-        condition.addTest();
-        this.conditions[this.currentConditionId] = condition;
+        let conditionVM = new ConditionViewModel(this.puzzle, this.currentConditionId, element);
+        conditionVM.addTest();
+        this.conditions.set(this.currentConditionId, conditionVM);
         ++this.currentConditionId;
     }
 
@@ -336,13 +493,14 @@ class ViewModel {
      */
     removeCondition(conditionId) {
         let newHtml = "";
-        for (const condId in this.conditions) {
-            if (conditionId != condId) {
-                // Keep this condition
-                newHtml += "<li>" + this.conditions[condId].getConditionElement().outerHTML + "</li>";
+        for (const conditioNVM of this.conditions.values()) {
+            if (conditionId !== conditionVM.getId()) {
+                newHtml += "<li>" + conditionVM.getConditionElement().outerHTML
+                        + "</li>";
             }
-        }this.conditionsList.innerHTML = newHtml;
-        delete this.conditions[conditionId];
+        }
+        this.conditionsList.innerHTML = newHtml;
+        this.conditions.delete(conditionId);
     }
 
     /**
@@ -351,7 +509,7 @@ class ViewModel {
      * @param {number} testId is the ID of the test to remove
      */
     removeTest(conditionId, testId) {
-        this.conditions[conditionId].removeTest(testId);
+        this.conditions.get(conditionId).removeTest(testId);
     }
 
 }
