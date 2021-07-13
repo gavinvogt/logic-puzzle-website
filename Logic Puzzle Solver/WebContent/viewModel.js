@@ -146,17 +146,16 @@ class CategoryViewModel {
         this.optionInputs.forEach(input => {
             this.optionValues.push(input.value);
         })
+        console.log(this.id + " " + this.optionValues);
     }
 
     fillInValues() {
-        console.log("filling in values for " + this.id);
         this.findViewElements();
         this.nameInput.value = this.catName;
         let n = (this.optionValues.length < this.optionInputs.length)
                 ? this.optionValues.length : this.optionInputs.length;
         for (let i = 0; i < n; ++i) {
             this.optionInputs[i].value = this.optionValues[i];
-            console.log("option " + i + " : " + this.optionValues[i]);
         }
     }
 
@@ -174,7 +173,7 @@ class CategoryViewModel {
      */
     readOptionNames() {
         let optionNames = [];
-        optionNames.forEach(input => {
+        this.optionInputs.forEach(input => {
             optionNames.push(input.value);
         })
         return optionNames;
@@ -354,12 +353,14 @@ class ViewModel {
             // Get the data from the categoryVM
             let categoryVM = this.categories.get(category.getId());
             category.setName(categoryVM.readName());
+            console.log("Name: " + categoryVM.readName());
 
             // Update the option names
             let options = category.getOptions();
             let optionNames = categoryVM.readOptionNames();
             for (let i = 0, n = options.length; i < n; ++i) {
                 options[i].setName(optionNames[i]);
+                console.log("Option " + i + " : " + optionNames[i]);
             }
         });
     }
