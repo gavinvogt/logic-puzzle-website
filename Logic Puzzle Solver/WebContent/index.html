@@ -15,7 +15,7 @@
 <form onsubmit="solvePuzzle();return false;">
 <button type="submit" class="solveButton">Solve</button>
 <h2>Setup</h2>
-Number of options per category: <input type="number" id="numOptions" onchange="binding.updateNumOptions();" value="4" min="2">
+Number of options per category: <input type="number" id="numOptions" onchange="binding.updateNumOptions();" value="2" min="2">
 <hr>
 
 <div id="categories">
@@ -51,7 +51,7 @@ Number of options per category: <input type="number" id="numOptions" onchange="b
 var puzzle = new Puzzle();
 
 // Track various counts
-var numCategories = 3;
+var numCategories = 2;
 
 // Set up the View-Model
 var binding = new ViewModel(puzzle);
@@ -62,7 +62,7 @@ loadTable();
 binding.addCondition();   // start with a single condition
 
 function setUpInputs() {
-    for (var i = 0; i < numCategories; i++) {
+    for (var i = 0; i < numCategories; ++i) {
         binding.addCategory();
     }
 }
@@ -81,16 +81,20 @@ function solvePuzzle() {
         alert("Invalid input:\n" + validity);
         return;
     }
-    
+
+    var conditions = binding.createConditions();
+    console.log(conditions);
+
     // Solve the puzzle
-    var solution = puzzle.solveBruteForce(); // array of Entities
+    var solution = puzzle.solveBruteForce(conditions); // array of Entities
     // TODO: how to present the solution
     if (solution == null) {
         alert("No solution found");
     } else {
-        "<img src='images/selection_marker.png' alt='X' height='14px' width='14px'>";
+        //"<img src='images/selection_marker.png' alt='X' height='14px' width='14px'>";
         
         alert("Solved logic puzzle");
+        console.log(solution);
     }
 }
 

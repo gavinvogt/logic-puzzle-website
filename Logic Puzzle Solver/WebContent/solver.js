@@ -149,7 +149,7 @@
         // TODO: brute force and elegant version
         
         // TODO: create each possibility
-        catIndices = [...this.categories.keys()];
+        let catIndices = [...this.categories.keys()];
         return this.solveBruteForceHelper(conditions, entities, catIndices, 0);
     }
 
@@ -169,8 +169,8 @@
         let category = this.categories[curIndex];
         let categoryId = category.getId();
         let optionIds = [];
-        category.forEach(option => {
-            optionIds.add(option.getId());
+        category.getOptions().forEach(option => {
+            optionIds.push(option.getId());
         })
         // Implementation yoinked from https://stackoverflow.com/a/22063440
         var permutations = catIndices.reduce(function permute(res, item, key, arr) {
@@ -186,20 +186,22 @@
             }
 
             // Check solution OR recurse deeper to fill in other categories
+            ++curIndex;
             if (curIndex < catIndices.length) {
                 // Need to go deeper
-                solution = this.solveHelper(conditions, catIndices, curIndex + 1,
-                                            permuations);
+                let solution = this.solveBruteForceHelper(conditions, entities,
+                                                      catIndices, curIndex);
                 if (solution !== null) {
+                    // Found solution
                     return solution;
                 }
+                // Otherwise continue through other permutations
             } else {
                 // Try the solution
-                if (this._isSolved(entities)) {
+                if (this._isSolved(conditions)) {
                     return entities;
-                } else {
-                    return null;
                 }
+                // Otherwise continue through other permutations
             }
         });
 
@@ -209,14 +211,14 @@
 
     /**
      * Checks if this Puzzle is solved
-     * @param {Entity[]} entities is the array of Entity objects that
-     * attempts to solve this puzzle
+     * @param {Condition[]} condition is the array of conditions that
+     * must be passed for the puzzle to be solved
      * @returns {boolean} whether this puzzle is solved by the current
      * arrangement
      */
-    _isSolved(entities) {
-        this.conditions.forEach(condition => {
-            if (!condition.check(this, entities)) {
+    _isSolved(conditions) {
+        conditions.forEach(condition => {
+            if (!condition.check(this)) {
                 // Failed a condition
                 return false;
             }
@@ -592,52 +594,119 @@ class Condition {
     /**
      * Checks if this condition is satisfied by the puzzle
      * @param {Puzzle} puzzle is the Puzzle to check
-     * @param {Entity[]} entities is the array of Entity objects to
-     * check if they satisfy the condition
      * @returns {boolean} whether the entities satisfy the condition
      */
-    check(puzzle, entities) {
+    check(puzzle) {
+        // Get number of true tests
         var count = 0;
-        for (var i = 0; i < this.tests.length; ++i) {
-            // Check each test
-            if (count > this.num) {
-                // Went past the number required; stop
-                return false;
-            }
-            count += this.tests[i].check(puzzle, entities);
+        this.tests.forEach(test => {
+            count += test.check(puzzle);
+        });
+
+        // Check if number correct passes the logic
+        switch (this.logic) {
+            case "=":
+                return (count !== this.num);
+            case "!=":
+                return (count !== this.num);
+            case "<":
+                return (count < this.num);
+            case "<=":
+                return (count <= this.num);
+            case ">":
+                return (count > this.num);
+            case ">=":
+                return (count >= this.num);
         }
-        return (count == this.num);
     }
     
 }
 
 /**
- * This class represents a single test that is part of a Condition
+ * This class represents a single test that is part of a Condition.
+ * It is the base class for MatchTest and CompareTest (not meant for use).
  */
 class Test {
-
     /**
      * Creates the Test for the puzzle to pass
      * @param {number} cat1 is the ID of the first category
      * @param {number} option1 is the ID of the option for the first category
-     * @param operation1 
-     * @param test 
+     * @param {string} test is the string representing the test to do
      * @param {number} cat2 is the ID of the second category
      * @param {number} option2 is the ID of the option for the second category
-     * @param operation2 
      */
-    constructor(cat1, option1, operation1, test, cat2, option2, operation2) {
-        // TODO: dealing with the operation and test
+    constructor(cat1, option1, test, cat2, option2) {
+        this.cat1 = cat1;
+        this.option1 = option1;
+        this.test = test;
+        this.cat2 = cat2;
+        this.option2 = option2;
+    }
+}
 
-        this.cat1 = cat1;        // ID of category 1
-        this.option1 = option1;  // ID of option 1
-        this.op1 = operation1;
-        this.test = test
-        this.cat2 = cat2;        // ID of category 2
-        this.option2 = option2;  // ID of option 2
-        this.op2 = operation2;
+class MatchTest extends Test {
+    /**
+     * Creates the MatchTest for the puzzle to pass. It means that the entity
+     * that has attribute `option1` must also have attribute `option2` (is)
+     * @param {number} cat1 is the ID of the first category
+     * @param {number} option1 is the ID of the option for the first category
+     * @param {string} test is the string representing the test to do
+     * @param {number} cat2 is the ID of the second category
+     * @param {number} option2 is the ID of the option for the second category
+     */
+    constructor(cat1, option1, test, cat2, option2) {
+        super(cat1, option1, test, cat2, option2);
     }
 
+    check(puzzle) {
+        // Get category 1
+        let category1 = puzzle.getCategoryById(this.cat1);
+        let option1 = category1.getOption(this.option1);
+
+        // Get category 2
+        let category2 = puzzle.getCategoryById(this.cat2);
+        let option2 = category2.getOption(this.option2);
+        
+        // Check if the logical test is true
+        switch (this.test) {
+            case "is":
+                // Entity for option1 is same as entity for option2
+                return Number(option1.getEntity() === option2.getEntity());
+            case "isn't":
+                // Entity for option1 is not same as entity for option2
+                return Number(option1.getEntity() !== option2.getEntity());
+        }
+
+        // Didn't recognize the test type
+        return 0;
+    }
+}
+
+class CompareTest extends Test {
+    /**
+     * Creates the CompareTest for the puzzle to pass. This means that it
+     * gets the entities for `option1` and `option2`, and then does some kind
+     * of comparison between the names of each entity's attribute from the
+     * given sub-categories
+     * @param {number} cat1 is the ID of the first category
+     * @param {number} option1 is the ID of the option for the first category
+     * @param {number} subCat1 is the ID of the first sub-category
+     * @param {string} operations1 is the operations to do on the first name
+     * @param {string} test is the string representing the test to do
+     * @param {number} cat2 is the ID of the second category
+     * @param {number} option2 is the ID of the option for the second category
+     * @param {number} subCat2 is the ID of the second sub-category
+     * @param {string} operations2 is the operations to do on the second name
+     */
+    constructor(cat1, option1, subCat1, operations1, test, cat2, option2, subCat2, operations2) {
+        super(cat1, option1, test, cat2, option2);
+        this.subCat1 = subCat1;   // ID of sub-category 1
+        this.ops1 = operations1;  // operations to do on first
+        this.subCat2 = subCat2;   // ID of sub-category 2
+        this.ops2 = operations2;  // operations to do on second
+    }
+
+    
     /**
      * Checks if the puzzle satisfies this test
      * @param {Puzzle} puzzle is the Puzzle to check
@@ -645,44 +714,72 @@ class Test {
      * attempts to solve the puzzle
      * @returns {number} 0 if failed, 1 if passed
      */
-    check(puzzle, entities) {
-        // TODO: checking if the puzzle passes the test
+    check(puzzle) {
         let category1 = puzzle.getCategoryById(this.cat1);
         let option1 = category1.getOption(this.option1);
-        // TODO: apply op1
+        let attr1 = option1.getEntity().getAttribute(this.subCat1).getName();
+        let val1 = this._applyOperations(attr1, this.ops1);
 
         let category2 = puzzle.getCategoryById(this.cat2);
         let option2 = category2.getOption(this.option2);
-        // TODO: apply op2
+        let attr2 = option2.getEntity().getAttribute(this.subCat2).getName();
+        let val2 = this._applyOperations(attr2, this.ops2);
         
+        /*
+        console.log("Attrs:");
+        console.log(attr1);
+        console.log(attr2);
+
+        console.log("After operations:");
+        console.log("val1: " + val1 + " (" + typeof val1 +")");
+        console.log("val2: " + val2 + " (" + typeof val2 +")");
+        */
+
         // Check if the logical test is true
         switch (this.test) {
-            case "is":
-                // Entity for option1 is same as entity for option2
-                return (option1.getEntity() === option2.getEntity());
-            case "isn't":
-                // Entity for option1 is not same as entity for option2
-                return (option1.getEntity() !== option2.getEntity());
             case "=":
-                ;
-                break;
+                return Number(val1 === val2);
             case "!=":
-                ;
-                break;
+                return Number(val1 !== val2);
             case "<=":
-                ;
-                break;
+                return Number(val1 <= val2);
             case ">=":
-                ;
-                break;
+                return Number(val1 >= val2);
             case "<":
-                ;
-                break;
+                return Number(val1 < val2);
             case ">":
-                ;
+                return Number(val1 > val2);
         }
+
+        // Didn't recognize test
+        return 0;
+    }
+
+    _applyOperations(name, ops) {
+        ops.split(" ").forEach(op => {
+            if (op.startsWith("[") && op.endsWith("]")) {
+                name = name.charAt(Number(op.substring(1, op.length - 1)));
+            } else if (op.startsWith("+")) {
+                // Adding a number
+                name += Number(op.substring(1));
+            } else if (op.startsWith("-")) {
+                // Subtracting a number
+                name -= Number(op.substring(1));
+            } else if (op.startsWith("*")) {
+                // Multiplying by a number
+                name *= Number(op.substring(1));
+            } else if (op.startsWith("/")) {
+                // Dividing by a number
+                name /= Number(op.substring(1));
+            } else if (op.includes("#")) {
+                // Convert to a number
+                name = Number(name);
+            }
+        });
+        return name;
     }
 }
+
 
 /**
  * This class represents a single Entity that is part of the puzzle.

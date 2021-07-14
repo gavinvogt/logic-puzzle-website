@@ -523,7 +523,13 @@ class MatchTestViewModel extends TestViewModel {
     }
 
     createTest() {
-        return new MatchTest();
+        this.findViewElements();
+        let cat1 = Number(this.getCat1());
+        let option1 = Number(this.getOption1());
+        let type = this.getType();
+        let cat2 = Number(this.getCat2());
+        let option2 = Number(this.getOption2());
+        return new MatchTest(cat1, option1, type, cat2, option2);
     }
 }
 
@@ -628,7 +634,17 @@ class CompareTestViewModel extends TestViewModel {
     }
 
     createTest() {
-        return new CompareTest();
+        this.findViewElements();
+        let cat1 = Number(this.getCat1());
+        let option1 = Number(this.getOption1());
+        let subCat1 = Number(this.getSubCat1());
+        let ops1 = this.getOps1();
+        let type = this.getType();
+        let cat2 = Number(this.getCat2());
+        let option2 = Number(this.getOption2());
+        let subCat2 = Number(this.getSubCat2());
+        let ops2 = this.getOps2();
+        return new CompareTest(cat1, option1, subCat1, ops1, type, cat2, option2, subCat2, ops2);
     }
 }
 
@@ -655,6 +671,10 @@ class ConditionViewModel {
      */
     getId() {
         return this.id;
+    }
+
+    getConditionElement() {
+        return document.getElementById(getConditionId(this.id));
     }
 
     findViewElements() {
@@ -728,8 +748,9 @@ class ConditionViewModel {
         let numTrue = Number(this.numSelect.value);
 
         // Create the tests
-        let tests = new Array(this.tests.size);
-        for (testVM of this.tests.values()) {
+        let tests = [];
+        //console.log(this.tests.values());
+        for (const testVM of this.tests.values()) {
             tests.push(testVM.createTest());
         }
 
@@ -947,6 +968,14 @@ class ViewModel {
      */
     removeTest(conditionId, testId) {
         this.conditions.get(conditionId).removeTest(testId);
+    }
+
+    createConditions() {
+        let conditions = [];
+        for (const conditionVM of this.conditions.values()) {
+            conditions.push(conditionVM.createCondition());
+        }
+        return conditions;
     }
 
 }
