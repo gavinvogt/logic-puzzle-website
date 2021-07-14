@@ -23,8 +23,7 @@ Number of options per category: <input type="number" id="numOptions" onchange="b
 <h3>Categories</h3>
 </div>
 
-<button type="button" class="externalButton" tabindex="-1" onclick="binding.addCategory();loadTable();">Add Category</button>
-<button type="button" class="externalButton" tabindex="-1" onclick="loadTable();">Update Puzzle</button>
+<button type="button" class="externalButton" tabindex="-1" onclick="binding.addCategory();binding.updatePuzzle();">Add Category</button>
 <br><br>
 <hr color="blueviolet">
 
@@ -71,7 +70,7 @@ function setUpInputs() {
 
 function solvePuzzle() {
     // Make sure the user's inputs are valid
-    loadTable();
+    binding.updatePuzzle();
     var validity = puzzle.validate();
     if (validity != null) {
         // Got an error message

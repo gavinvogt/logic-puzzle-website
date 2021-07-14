@@ -59,6 +59,7 @@
      * @returns {Category} the Category with matching ID, or `undefined`
      */
     getCategoryById(categoryId) {
+        categoryId = Number(categoryId);
         return this.categories.find(cat => cat.getId() === categoryId);
     }
 
@@ -68,6 +69,7 @@
      * @returns {Category} the Category with matching index
      */
     getCategoryByIndex(categoryIndex) {
+        categoryIndex = Number(categoryIndex);
         return this.categories[categoryIndex];
     }
     
@@ -401,7 +403,7 @@ class Category {
         if (this.name === "") {
             return "Category " + (this.id + 1);
         } else {
-            return this.name + " <b>(" + (this.id + 1) + ")</b>";
+            return this.name + " (" + (this.id + 1) + ")";
         }
     }
     
@@ -466,6 +468,7 @@ class Category {
      * @returns {Option} Option by ID
      */
     getOption(optionId) {
+        optionId = Number(optionId);
         return this.options[optionId];
     }
     

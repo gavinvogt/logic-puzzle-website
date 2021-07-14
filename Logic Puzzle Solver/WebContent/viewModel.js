@@ -117,11 +117,12 @@ function getConditionNumId(conditionId) {
  * of the given test
  * @param {number} conditionId is the ID of the condition
  * @param {number} testId is the ID of the test
+ * @param {number} num is the number of the category
  * @returns {string} ID for the first category selection element
- * @example getTestCat1Id(1, 2) - 'test1,2cat1'
+ * @example getTestCat1Id(1, 2, 1) - 'test1,2cat1'
  */
-function getTestCat1Id(conditionId, testId) {
-    return getTestId(conditionId, testId) + "cat1";
+function getTestCatId(conditionId, testId, num) {
+    return getTestId(conditionId, testId) + "cat" + num;
 }
 
 /**
@@ -129,11 +130,12 @@ function getTestCat1Id(conditionId, testId) {
  * of the given test
  * @param {number} conditionId is the ID of the condition
  * @param {number} testId is the ID of the test
+ * @param {number} num is the number of the option
  * @returns {string} ID for the first option selection element
- * @example getTestOption1Id(1, 2) - 'test1,2option1'
+ * @example getTestOption1Id(1, 2, 1) - 'test1,2option1'
  */
-function getTestOption1Id(conditionId, testId) {
-    return getTestId(conditionId, testId) + "option1";
+function getTestOptionId(conditionId, testId, num) {
+    return getTestId(conditionId, testId) + "option" + num;
 }
 
 /**
@@ -141,11 +143,12 @@ function getTestOption1Id(conditionId, testId) {
  * of the given test
  * @param {number} conditionId is the ID of the condition
  * @param {number} testId is the ID of the test
+ * @param {number} num is the number of the sub-category
  * @returns {string} ID for the first sub-category selection element
- * @example getTestSubCat1Id(1, 2) - 'test1,2subCat1'
+ * @example getTestSubCat1Id(1, 2, 1) - 'test1,2subCat1'
  */
-function getTestSubCat1Id(conditionId, testId) {
-    return getTestId(conditionId, testId) + "subCat1";
+function getTestSubCatId(conditionId, testId, num) {
+    return getTestId(conditionId, testId) + "subCat" + num;
 }
 
 /**
@@ -153,11 +156,12 @@ function getTestSubCat1Id(conditionId, testId) {
  * of the given test
  * @param {number} conditionId is the ID of the condition
  * @param {number} testId is the ID of the test
+ * @param {number} num is the number of the operations
  * @returns {string} ID for the first operations input element
- * @example getTestOps1Id(1, 2) - 'test1,2ops1'
+ * @example getTestOps1Id(1, 2, 1) - 'test1,2ops1'
  */
-function getTestOps1Id(conditionId, testId) {
-    return getTestId(conditionId, testId) + "ops1";
+function getTestOpsId(conditionId, testId, num) {
+    return getTestId(conditionId, testId) + "ops" + num;
 }
 
 /**
@@ -173,53 +177,14 @@ function getTestTypeId(conditionId, testId) {
 }
 
 /**
- * Creates the ID string for the second category selection element
- * of the given test
- * @param {number} conditionId is the ID of the condition
- * @param {number} testId is the ID of the test
- * @returns {string} ID for the second category selection element
- * @example getTestCat2Id(1, 2) - 'test1,2cat2'
+ * Clears all the child nodes of the given parent node
+ * @param parent is the document element to clear
  */
-function getTestCat2Id(conditionId, testId) {
-    return getTestId(conditionId, testId) + "cat2";
+function clearChildren(parent) {
+    while (parent.firstChild) {
+        parent.remove(parent.firstChild);
+    }
 }
-
-/**
- * Creates the ID string for the second option selection element
- * of the given test
- * @param {number} conditionId is the ID of the condition
- * @param {number} testId is the ID of the test
- * @returns {string} ID for the second option selection element
- * @example getTestOption2Id(1, 2) - 'test1,2option2'
- */
-function getTestOption2Id(conditionId, testId) {
-    return getTestId(conditionId, testId) + "option2";
-}
-
-/**
- * Creates the ID string for the second sub-category selection element
- * of the given test
- * @param {number} conditionId is the ID of the condition
- * @param {number} testId is the ID of the test
- * @returns {string} ID for the second sub-category selection element
- * @example getTestSubCat2Id(1, 2) - 'test1,2subCat2'
- */
-function getTestSubCat2Id(conditionId, testId) {
-    return getTestId(conditionId, testId) + "subCat2";
-}
-
-/**
- * Creates the ID string for the second operations input element
- * of the given test
- * @param {number} conditionId is the ID of the condition
- * @param {number} testId is the ID of the test
- * @returns {string} ID for the second operations input element
- * @example getTestOps2Id(1, 2) - 'test1,2ops2'
- */
-function getTestOps2Id(conditionId, testId) {
-    return getTestId(conditionId, testId) + "ops2";
-}
-
 
 
 
@@ -354,6 +319,9 @@ class CategoryViewModel {
         // Create the input element
         let input = document.createElement("input");
         input.id = getOptionId(this.id, optionId);
+        input.onchange = function() {
+            binding.updatePuzzle();
+        };
         input.required = true;
 
         // Add to the div
@@ -409,6 +377,82 @@ class TestViewModel {
     }
 
     /**
+     * Updates the various view inputs in the test based on
+     * the new data in the Puzzle
+     */
+    update() {
+        // Save the previous values
+        this.saveValues();
+
+        // Category + option 1 selections
+        this._fillCatSelect(this.cat1Select, this.cat1);
+        let category = this.puzzle.getCategoryById(this.cat1Select.value);
+        this._fillOptionSelect(category, this.option1Select, this.option1);
+
+        // Category + option 2 selections
+        this._fillCatSelect(this.cat2Select, this.cat2);
+        category = this.puzzle.getCategoryById(this.cat2Select.value);
+        this._fillOptionSelect(category, this.option2Select, this.option2);
+    }
+
+    /**
+     * Fills up a category selecter with all the categories from the Puzzle
+     * @param {HTMLSelectElement} catSelect 
+     * @param prevValue is the previous value the select was set to
+     */
+    _fillCatSelect(catSelect, prevValue) {
+        // Clear all previous options
+        clearChildren(catSelect);
+
+        // Remember what category to set value to
+        let prevCategory = this.puzzle.getCategoryById(prevValue);
+        if (!prevCategory) {
+            // Default to first category
+            prevCategory = this.puzzle.getCategoryByIndex(0);
+        }
+
+        // Add each option
+        this.puzzle.getCategories().forEach(category => {
+            let catOption = document.createElement("option");
+            catOption.value = category.getId();
+            catOption.text = category.getIdentifier();
+            catSelect.append(catOption);
+        });
+
+        // Set the value
+        catSelect.value = prevCategory.getId()
+    }
+
+    /**
+     * Fills up an option selecter with all the options from the given category
+     * @param {Category} category is the category to get options from
+     * @param {HTMLSelectElement} optionSelect is the select element
+     * @param prevValue is the previous value of the select
+     */
+    _fillOptionSelect(category, optionSelect, prevValue) {
+        // Clear all previous options
+        clearChildren(optionSelect);
+
+        // Remember what category to set value to
+        let prevOption = category.getOption(prevValue);
+        if (!prevOption) {
+            // Default to first option
+            prevOption = category.getOption(0);
+        }
+
+        // Add each option
+        category.getOptions().forEach(option => {
+            let optOption = document.createElement("option");
+            optOption.value = option.getId();
+            optOption.text = option.getIdentifier();
+            optionSelect.append(optOption);
+        });
+
+        // Set the value
+        optionSelect.value = prevOption.getId()
+    }
+
+    /**
      * Creates the div that the test will be held in
      * @returns {HTMLDivElement} of the div for the test
      */
@@ -420,9 +464,10 @@ class TestViewModel {
         return testDiv;
     }
 
-    _generateCat1Html() {
-        // <select> for the first Category
-        let testStr = '<select id="' + getTestCat1Id(this.conditionId, this.id) + '">';
+    _generateCatHtml(num) {
+        // <select> for the a Category
+        let testStr = '<select id="' + getTestCatId(this.conditionId, this.id, num)
+                    + '" onchange="binding.updateTests(' + this.conditionId + ');">';
         this.puzzle.getCategories().forEach(category => {
             testStr += "<option value='" + category.getId() + "'>"
                     + category.getIdentifier() + "</option>";
@@ -430,9 +475,9 @@ class TestViewModel {
         return testStr + "</select>";
     }
 
-    _generateOption1Html() {
-        // <select> for the first Category's option
-        let testStr = '<select id="' + getTestOption1Id(this.conditionId, this.id) + '">';
+    _generateOptionHtml(num) {
+        // <select> for an option
+        let testStr = '<select id="' + getTestOptionId(this.conditionId, this.id, num) + '">';
         let firstCategory = this.puzzle.getCategoryByIndex(0);
         firstCategory.getOptions().forEach(option => {
             testStr += "<option value='" + option.getId() + "'>"
@@ -451,27 +496,6 @@ class TestViewModel {
         return typeStr + "</select>";
     }
 
-    _generateCat2Html() {
-        // <select> for the second Category
-        let testStr = '<select id="' + getTestCat2Id(this.conditionId, this.id) + '">';
-        this.puzzle.getCategories().forEach(category => {
-            testStr += "<option value='" + category.getId() + "'>"
-                    + category.getIdentifier() + "</option>";
-        });
-        return testStr + "</select>";
-    }
-
-    _generateOption2Html() {
-        // <select> for the second Category's option
-        let testStr = '<select id="' + getTestOption2Id(this.conditionId, this.id) + '">';
-        let firstCategory = this.puzzle.getCategoryByIndex(0);
-        firstCategory.getOptions().forEach(option => {
-            testStr += "<option value='" + option.getId() + "'>"
-                    + option.getIdentifier() + "</option>";
-        });
-        return testStr + "</select>";
-    }
-
     _generateRemoveHtml() {
         // Button to remove test
         return '<button type="button" class="internalButton" onclick="binding.removeTest('
@@ -485,15 +509,15 @@ class TestViewModel {
         this.testDiv = document.getElementById(
                 getTestId(this.conditionId, this.id));
         this.cat1Select = document.getElementById(
-                getTestCat1Id(this.conditionId, this.id));
+                getTestCatId(this.conditionId, this.id, 1));
         this.option1Select = document.getElementById(
-                getTestOption1Id(this.conditionId, this.id));
+                getTestOptionId(this.conditionId, this.id, 1));
         this.typeSelect = document.getElementById(
                 getTestTypeId(this.conditionId, this.id));
         this.cat2Select = document.getElementById(
-                getTestCat2Id(this.conditionId, this.id));
+                getTestCatId(this.conditionId, this.id, 2));
         this.option2Select = document.getElementById(
-                getTestOption2Id(this.conditionId, this.id));
+                getTestOptionId(this.conditionId, this.id, 2));
     }
 
     saveValues() {
@@ -560,10 +584,10 @@ class MatchTestViewModel extends TestViewModel {
     generateTestDiv() {
         // Create test container
         let testDiv = this._createDiv("matchTest");
-        testDiv.innerHTML = this._generateCat1Html() + " "
-            + this._generateOption1Html() + " "
+        testDiv.innerHTML = this._generateCatHtml(1) + " "
+            + this._generateOptionHtml(1) + " "
             + this._generateTypeHtml("is", "isn't") + " "
-            + this._generateCat2Html() + " " + this._generateOption2Html()
+            + this._generateCatHtml(2) + " " + this._generateOptionHtml(2)
             + this._generateRemoveHtml();
         return testDiv;
     }
@@ -584,22 +608,34 @@ class CompareTestViewModel extends TestViewModel {
         super(puzzle, conditionId, testId);
     }
 
+    findViewElements() {
+        super.findViewElements();
+        this.subCat1Select = document.getElementById(
+            getTestSubCatId(this.conditionId, this.id, 1));
+        this.ops1Input = document.getElementById(
+            getTestOpsId(this.conditionId, this.id, 1));
+        this.subCat2Select = document.getElementById(
+            getTestSubCatId(this.conditionId, this.id, 2));
+        this.ops2Input = document.getElementById(
+            getTestOpsId(this.conditionId, this.id, 2));
+    }
+
     generateTestDiv() {
         // Create test container
         let testDiv = this._createDiv("compareTest");
-        testDiv.innerHTML = this._generateCat1Html() + " "
-            + this._generateOption1Html() + " "
-            + this._generateSubCat1Html() + " " + this._generateOps1Html() + " "
+        testDiv.innerHTML = this._generateCatHtml(1) + " "
+            + this._generateOptionHtml(1) + " "
+            + this._generateSubCatHtml(1) + " " + this._generateOpsHtml(1) + " "
             + this._generateTypeHtml("=", "!=", "<", "<=", ">", ">=") + " "
-            + this._generateCat2Html() + " " + this._generateOption2Html() + " "
-            + this._generateSubCat2Html() + " " + this._generateOps2Html()
+            + this._generateCatHtml(2) + " " + this._generateOptionHtml(2) + " "
+            + this._generateSubCatHtml(2) + " " + this._generateOpsHtml(2)
             + this._generateRemoveHtml();
         return testDiv;
     }
 
-    _generateSubCat1Html() {
-        // <select> for the first sub-category
-        let testStr = '<select id="' + getTestSubCat1Id(this.conditionId, this.id) + '">';
+    _generateSubCatHtml(num) {
+        // <select> for a sub-category
+        let testStr = '<select id="' + getTestSubCatId(this.conditionId, this.id, num) + '">';
         this.puzzle.getCategories().forEach(category => {
             testStr += "<option value='" + category.getId() + "'>"
                     + category.getIdentifier() + "</option>";
@@ -607,47 +643,39 @@ class CompareTestViewModel extends TestViewModel {
         return testStr + "</select>";
     }
 
-    _generateOps1Html() {
-        // Operations for the first item
+    _generateOpsHtml(num) {
+        // Operations for the operations to do
         return '<input maxlength="15" size="10" id="'
-                + getTestOps1Id(this.conditionId, this.id)
+                + getTestOpsId(this.conditionId, this.id, num)
                 + '" placeholder="any operations">';
     }
 
-    _generateSubCat2Html() {
-        // <select> for the second sub-category
-        let testStr = '<select id="' + getTestSubCat2Id(this.conditionId, this.id) + '">';
-        this.puzzle.getCategories().forEach(category => {
-            testStr += "<option value='" + category.getId() + "'>"
-                    + category.getIdentifier() + "</option>";
-        });
-        return testStr + "</select>";
-    }
+    /**
+     * Updates the various view inputs in the test based on
+     * the new data in the Puzzle
+     */
+    update() {
+        // Save the previous values
+        this.saveValues();
 
-    _generateOps2Html() {
-        // Operations for the second item
-        return '<input maxlength="15" size="10" id="'
-                + getTestOps2Id(this.conditionId, this.id)
-                + '" placeholder="any operations">';
-    }
+        // Category + option 1 selections
+        this._fillCatSelect(this.cat1Select, this.cat1);
+        let category = this.puzzle.getCategoryById(this.cat1Select.value);
+        this._fillOptionSelect(category, this.option1Select, this.option1);
+        this._fillCatSelect(this.subCat1Select, this.subCat1);
 
-    findViewElements() {
-        super.findViewElements();
-        this.subCat1Input = document.getElementById(
-                getTestSubCat1Id(this.conditionId, this.id));
-        this.ops1Input = document.getElementById(
-                getTestOps1Id(this.conditionId, this.id));
-        this.subCat2Input = document.getElementById(
-                getTestSubCat2Id(this.conditionId, this.id));
-        this.ops2Input = document.getElementById(
-                getTestOps2Id(this.conditionId, this.id));
+        // Category + option 2 selections
+        this._fillCatSelect(this.cat2Select, this.cat2);
+        category = this.puzzle.getCategoryById(this.cat2Select.value);
+        this._fillOptionSelect(category, this.option2Select, this.option2);
+        this._fillCatSelect(this.subCat2Select, this.subCat2);
     }
 
     saveValues() {
         super.saveValues();
-        this.subCat1Input = this.getSubCat1();
+        this.subCat1 = this.getSubCat1();
         this.ops1 = this.getOps1();
-        this.subCat2Input = this.getSubCat2();
+        this.subCat2 = this.getSubCat2();
         this.ops2 = this.getOps2();
     }
 
@@ -655,7 +683,7 @@ class CompareTestViewModel extends TestViewModel {
      * Gets the value for the first sub-category ID
      */
     getSubCat1() {
-        return this.subCat1Input.value;
+        return this.subCat1Select.value;
     }
 
     /**
@@ -670,7 +698,7 @@ class CompareTestViewModel extends TestViewModel {
      * Gets the value for the second sub-category ID
      */
     getSubCat2() {
-        return this.subCat2Input.value;
+        return this.subCat2Select.value;
     }
 
     /**
@@ -729,6 +757,16 @@ class ConditionViewModel {
         this.testsDiv = document.getElementById(getTestsId(this.id));
         this.logicSelect = document.getElementById(getConditionLogicId(this.id));
         this.numSelect = document.getElementById(getConditionNumId(this.id));
+    }
+
+    /**
+     * Updates the view for each test in the condition based on
+     * the new information in the Puzzle
+     */
+    updateTests() {
+        for (const testVM of this.tests.values()) {
+            testVM.update();
+        }
     }
 
     /**
@@ -842,7 +880,7 @@ class ViewModel {
     /**
      * Loads all the category / option name inputs into the Puzzle
      */
-    loadNamingInputs() {
+    _loadNamingInputs() {
         // Load the category / option information into the table
         puzzle.getCategories().forEach(category => {
             // Get the data from the categoryVM
@@ -859,10 +897,21 @@ class ViewModel {
     }
 
     /**
+     * Updates the tests for the Condition View-Model
+     * @param {number} conditionId is the ID of the condition view to update
+     */
+    updateTests(conditionId) {
+        this.conditions.get(conditionId).updateTests();
+    }
+
+    /**
      * Updates the puzzle table according to the information in the Puzzle
      */
     updatePuzzle() {
-        this.loadNamingInputs();
+        this._loadNamingInputs();
+        for (const conditionVM of this.conditions.values()) {
+            conditionVM.updateTests();
+        }
         this.puzzleTable.innerHTML = this.puzzle.createHtml();
     }
 
@@ -884,7 +933,7 @@ class ViewModel {
         for (const categoryVM of this.categories.values()) {
             categoryVM.setNumOptions(newNum);
         }
-        this.updatePuzzleTable();
+        this.updatePuzzle();
     }
 
     /**
@@ -923,10 +972,10 @@ class ViewModel {
         let catNameIdString = getCategoryNameId(this.currentCategoryId);
         let optionsIdString = getOptionsId(this.currentCategoryId);
         categoryDiv.innerHTML = "<i>Category " + (this.currentCategoryId + 1)
-            + "</i>: <input id='" + catNameIdString + "' required>"
+            + "</i>: <input id='" + catNameIdString + "' required onchange='binding.updatePuzzle();'>"
             + "<button type='button' class='internalButton' tabindex='-1' "
             + "onclick='binding.removeCategory(" + this.currentCategoryId
-            + ");loadTable();'>Remove Category</button>"
+            + ");binding.updatePuzzle();'>Remove Category</button>"
             + "<hr><div class='optionInputDiv' id='" + optionsIdString
             + "'></div>";
         return categoryDiv
