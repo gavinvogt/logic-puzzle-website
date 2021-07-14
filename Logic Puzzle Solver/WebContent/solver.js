@@ -54,18 +54,6 @@
     }
     
     /**
-     * Edits a category name by category ID
-     * @param {number} categoryId is the ID of the category to edit
-     * @param {string} newName is the new name of the category
-     * @returns {boolean} true if the name was valid, and false if
-     * the category could not be renamed
-     */
-    editCategoryName(categoryId, newName) {
-        // TODO: actually check if can rename
-        this.categories[categoryId].setName(newName);
-    }
-    
-    /**
      * Gets a category in the Puzzle by ID
      * @param {number} categoryId is the ID of the category to get
      * @returns {Category} the Category with matching ID
@@ -470,18 +458,6 @@ class Category {
         for (let i = 0; i < numToAdd; ++i) {
             action(this);
         }
-    }
-    
-    /**
-     * Edits an option name by option ID
-     * @param {number} optionId is the ID of the option to edit
-     * @param {string} newName is the new name of the option
-     * @returns {boolean} true if the name was valid, and false if
-     * the option could not be renamed
-     */
-    editOptionName(optionId, newName) {
-        // TODO: check if rename is possible
-        this.options[optionId].setName(newName);
     }
     
     /**
