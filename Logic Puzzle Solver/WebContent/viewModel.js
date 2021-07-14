@@ -279,17 +279,19 @@ class CategoryViewModel {
      * View-Model
      */
     setNumOptions(numOptions) {
-        // Save the old option input values
-        this.saveValues();
-
-        // Replace inner HTML of category div with new number of option inputs
-        this.optionsDiv.innerHTML = "";
-        for (let i = 0; i < numOptions; ++i) {
-            this._addOptionInput(i);
+        this.findViewElements();
+        let curNum = this.optionInputs.length;
+        let numToAdd = numOptions - curNum;
+        if (numToAdd > 0) {
+            for (let i = 0; i < numToAdd; ++i) {
+                this._addOptionInput(curNum + i);
+            }
+        } else if (numToAdd < 0) {
+            numToAdd = -numToAdd;
+            for (let i = 0; i < numToAdd; ++i) {
+                this._removeOptionInput();
+            }
         }
-
-        // Insert the previous values
-        this.fillInValues();
     }
 
     /**
@@ -299,7 +301,6 @@ class CategoryViewModel {
     addOption() {
         let newOption = this.puzzle.getCategoryById(this.id).addOption();
         this._addOptionInput(newOption.getId());
-        this._findInputs();
     }
     
     /**
@@ -338,6 +339,7 @@ class CategoryViewModel {
      * @returns {string[]} array of option names (indexed by option ID)
      */
     readOptionNames() {
+        this._findInputs();
         let optionNames = [];
         this.optionInputs.forEach(input => {
             optionNames.push(input.value);
@@ -349,10 +351,27 @@ class CategoryViewModel {
      * Adds an option input field to this category
      */
     _addOptionInput(optionId) {
-        // Add an option to this Category in the Puzzle
-        let optionIdString = getOptionId(this.id, optionId);
-        this.optionsDiv.innerHTML += "Option " + (optionId + 1) + ": <input id='"
-                + optionIdString + "' required><br>";
+        // Create the input element
+        let input = document.createElement("input");
+        input.id = getOptionId(this.id, optionId);
+        input.required = true;
+
+        // Add to the div
+        this.optionsDiv.append(
+            "Option " + (optionId + 1) + ": ",
+            input,
+            document.createElement("br")
+        );
+    }
+
+    /**
+     * Removes the last option input field in this category
+     */
+    _removeOptionInput() {
+        // Remove test, input, and <br>
+        for (let i = 0; i < 3; ++i) {
+            this.optionsDiv.lastChild.remove();
+        }
     }
 }
 
@@ -389,10 +408,16 @@ class TestViewModel {
         return this.conditionId;
     }
 
-    _generateDivHtml(testType) {
-        // Opening div tag for the test container
-        return '<div class="testContainer ' + testType + '" id="'
-                + getTestId(this.conditionId, this.id) + '">'
+    /**
+     * Creates the div that the test will be held in
+     * @returns {HTMLDivElement} of the div for the test
+     */
+    _createDiv(testType) {
+        // Div for the test container
+        let testDiv = document.createElement("div");
+        testDiv.className = "testContainer " + testType;
+        testDiv.id = getTestId(this.conditionId, this.id);
+        return testDiv;
     }
 
     _generateCat1Html() {
@@ -528,13 +553,19 @@ class MatchTestViewModel extends TestViewModel {
         super(puzzle, conditionId, testId);
     }
 
-    generateHtml() {
+    /**
+     * Creates the div for entering the test
+     * @returns {HTMLDivElement} div holding the test input
+     */
+    generateTestDiv() {
         // Create test container
-        let testStr = this._generateDivHtml("matchTest")
-            + this._generateCat1Html() + " " + this._generateOption1Html() + " "
+        let testDiv = this._createDiv("matchTest");
+        testDiv.innerHTML = this._generateCat1Html() + " "
+            + this._generateOption1Html() + " "
             + this._generateTypeHtml("is", "isn't") + " "
-            + this._generateCat2Html() + " " + this._generateOption2Html();
-        return testStr + "</div>";
+            + this._generateCat2Html() + " " + this._generateOption2Html()
+            + this._generateRemoveHtml();
+        return testDiv;
     }
 
     createTest() {
@@ -553,15 +584,17 @@ class CompareTestViewModel extends TestViewModel {
         super(puzzle, conditionId, testId);
     }
 
-    generateHtml() {
+    generateTestDiv() {
         // Create test container
-        let testStr = this._generateDivHtml("compareTest")
-            + this._generateCat1Html() + " " + this._generateOption1Html() + " "
+        let testDiv = this._createDiv("compareTest");
+        testDiv.innerHTML = this._generateCat1Html() + " "
+            + this._generateOption1Html() + " "
             + this._generateSubCat1Html() + " " + this._generateOps1Html() + " "
             + this._generateTypeHtml("=", "!=", "<", "<=", ">", ">=") + " "
             + this._generateCat2Html() + " " + this._generateOption2Html() + " "
-            + this._generateSubCat2Html() + " " + this._generateOps2Html();
-        return testStr + "</div>";
+            + this._generateSubCat2Html() + " " + this._generateOps2Html()
+            + this._generateRemoveHtml();
+        return testDiv;
     }
 
     _generateSubCat1Html() {
@@ -715,9 +748,11 @@ class ConditionViewModel {
             return;
         }
 
-        // Generate the HTML and save the View-Model
-        this.testsDiv.innerHTML += testVM.generateHtml();
-        testVM.saveValues();
+        // Add to the view
+        let testDiv = testVM.generateTestDiv();
+        this.testsDiv.append(testDiv);
+
+        // Add to the model
         this.tests.set(this.currentTestId, testVM);
         ++this.currentTestId;
 
@@ -730,14 +765,11 @@ class ConditionViewModel {
      * @param {number} testId is the ID of the test to remove
      */
     removeTest(testId) {
-        let newHtml = "";
-        for (const testVM of this.tests.values()) {
-            if (testId !== testVM.getId()) {
-                // Keep this test
-                newHtml += testVM.getTestElement().outerHTML;
-            }
-        }
-        this.testsDiv.innerHTML = newHtml;
+        // Remove test from view
+        let testDiv = document.getElementById(getTestId(this.id, testId));
+        testDiv.parentNode.removeChild(testDiv);
+
+        // Remove test from model
         this.tests.delete(testId);
         
         // Update max of num input
@@ -746,11 +778,17 @@ class ConditionViewModel {
 
     /**
      * Updates the max value of the number true selector based
-     * on the number of tests in the condition
+     * on the number of tests in the condition. Might update
+     * the value of the num selector as well
      */
     updateMaxNum() {
         this.findViewElements();
-        this.numSelect.max = this.tests.size;
+        let newMax = this.tests.size;
+        if (this.numSelect.value == this.numSelect.max) {
+            // Change value to new max
+            this.numSelect.value = newMax;
+        }
+        this.numSelect.max = newMax;
     }
 
     /**
@@ -823,7 +861,8 @@ class ViewModel {
     /**
      * Updates the puzzle table according to the information in the Puzzle
      */
-    updatePuzzleTable() {
+    updatePuzzle() {
+        this.loadNamingInputs();
         this.puzzleTable.innerHTML = this.puzzle.createHtml();
     }
 
@@ -853,13 +892,12 @@ class ViewModel {
      * for the next time one is added
      */
     addCategory() {
-        // Save the input values
-        for (const categoryVM of this.categories.values()) {
-            categoryVM.saveValues();
-        }
+        // Add the category to the view
+        let categoryDiv = this._createCategoryInputDiv();
+        this.categoriesDiv.append(categoryDiv);
 
+        // Add the category to the model
         this.puzzle.addCategory(this.currentCategoryId);
-        this._createCategoryInput();
         let categoryVM = new CategoryViewModel(puzzle, this.currentCategoryId);
         this.categories.set(this.currentCategoryId, categoryVM);
         
@@ -868,29 +906,30 @@ class ViewModel {
             categoryVM.addOption();
         }
         ++this.currentCategoryId;
-
-        // Fill the values back into the view
-        for (const categoryVM of this.categories.values()) {
-            categoryVM.fillInValues();
-        }
     }
 
     /**
      * Creates the category input HTML string and adds it to the Categories div.
      * Uses the current category ID.
+     * @returns {HTMLDivElement} div holding the category input
      */
-    _createCategoryInput() {
-        let catIdString = getCategoryId(this.currentCategoryId);
+    _createCategoryInputDiv() {
+        // Create the category div
+        let categoryDiv = document.createElement("div");
+        categoryDiv.className = "categoryContainer";
+        categoryDiv.id = getCategoryId(this.currentCategoryId);
+
+        // Set the inner HTML of the div
         let catNameIdString = getCategoryNameId(this.currentCategoryId);
         let optionsIdString = getOptionsId(this.currentCategoryId);
-        this.categoriesDiv.innerHTML += "<div class='categoryContainer' id='"
-            + catIdString + "'><i>Category " + (this.currentCategoryId + 1)
+        categoryDiv.innerHTML = "<i>Category " + (this.currentCategoryId + 1)
             + "</i>: <input id='" + catNameIdString + "' required>"
             + "<button type='button' class='internalButton' tabindex='-1' "
             + "onclick='binding.removeCategory(" + this.currentCategoryId
             + ");loadTable();'>Remove Category</button>"
             + "<hr><div class='optionInputDiv' id='" + optionsIdString
-            + "'></div></div>";
+            + "'></div>";
+        return categoryDiv
     }
 
     /**
@@ -898,47 +937,46 @@ class ViewModel {
      * @param {number} categoryId is the ID of the category to remove
      */
     removeCategory(categoryId) {
-        let newHtml = ""
-        for (const categoryVM of this.categories.values()) {
-            categoryVM.saveValues();
-            if (categoryId != categoryVM.getId()) {
-                newHtml += categoryVM.getCategoryDiv().outerHTML;
-            }
-        }
-        this.categoriesDiv.innerHTML = newHtml;
+        // Remove from view
+        let categoryDiv = document.getElementById(getCategoryId(categoryId));
+        categoryDiv.parentNode.removeChild(categoryDiv);
+
+        // Remove from model
         this.categories.delete(categoryId);
         this.puzzle.removeCategoryById(categoryId);
-
-        // Fill the values back into the view
-        for (const categoryVM of this.categories.values()) {
-            categoryVM.fillInValues();
-        }
     }
 
     /**
      * Adds a condition to the page and updates the internal model
      */
     addCondition() {
-        this.conditionsList.innerHTML += "<li>" + this._generateConditionInput() + "</li>";
+        // Place the list item in the DOM tree
+        let conditionItem = document.createElement("li");
+        conditionItem.append(this._generateConditionInputDiv());
+        this.conditionsList.append(conditionItem);
+
+        // Add to the model
         let conditionVM = new ConditionViewModel(this.puzzle, this.currentConditionId);
-        conditionVM.addTest("compare");
         this.conditions.set(this.currentConditionId, conditionVM);
         ++this.currentConditionId;
     }
 
     /**
      * Generates the HTML code for a Condition input
-     * @returns {string} holding the HTML code for a Condition
+     * @returns {HTMLDivElement} of the div for inputting the condition
      */
-    _generateConditionInput() {
+    _generateConditionInputDiv() {
         // Create condition container
-        let conditionIdStr = getConditionId(this.currentConditionId);
+        let conditionDiv = document.createElement("div");
+        conditionDiv.className = "conditionContainer";
+        conditionDiv.id = getConditionId(this.currentConditionId);
+
+        // Create the HTML inside the div
         let testsIdStr = getTestsId(this.currentConditionId);
-        let conditionStr = "<div class='conditionContainer' id='" + conditionIdStr
-            + "'>Number of tests true must be "
+        conditionDiv.innerHTML = "Number of tests true must be "
             + '<select id="' + getConditionLogicId(this.currentConditionId) + '"><option>=</option><option>!=</option><option>&lt;</option>'
             + '<option>&lt;=</option><option>&gt;=</option><option>&gt;=</option>'
-            + '</select> <input type="number" value="1" min="0" style="width: 5em" id="'
+            + '</select> <input type="number" value="0" min="0" max="0" style="width: 5em" id="'
             + getConditionNumId(this.currentConditionId) + '">'
             + '<button type="button" class="internalButton" onclick="binding.removeCondition('
             + this.currentConditionId + ');">Remove Condition</button><hr>'
@@ -947,7 +985,7 @@ class ViewModel {
             + this.currentConditionId + ', ' + "'match'" + ');">Add Match Test</button> '
             + '<button type="button" class="externalButton" onclick="binding.addTest('
             + this.currentConditionId + ', ' + "'compare'" + ');">Add Compare Test</button>';
-        return conditionStr + "</div>";
+        return conditionDiv;
     }
 
     /**
@@ -955,14 +993,12 @@ class ViewModel {
      * @param {number} conditionId is the ID of the condition to remove
      */
     removeCondition(conditionId) {
-        let newHtml = "";
-        for (const conditionVM of this.conditions.values()) {
-            if (conditionId !== conditionVM.getId()) {
-                newHtml += "<li>" + conditionVM.getConditionElement().outerHTML
-                        + "</li>";
-            }
-        }
-        this.conditionsList.innerHTML = newHtml;
+        // Remove condition from the View
+        let conditionDiv = document.getElementById(getConditionId(conditionId));
+        let listItem = conditionDiv.parentNode;
+        listItem.parentNode.removeChild(listItem);
+
+        // Remove condition from the model
         this.conditions.delete(conditionId);
     }
 

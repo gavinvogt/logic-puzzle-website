@@ -16,7 +16,8 @@
 <button type="submit" class="solveButton">Solve</button>
 <h2>Setup</h2>
 Number of options per category: <input type="number" id="numOptions" onchange="binding.updateNumOptions();" value="2" min="2">
-<hr>
+<br><br>
+<hr color="blueviolet">
 
 <div id="categories">
 <h3>Categories</h3>
@@ -24,7 +25,8 @@ Number of options per category: <input type="number" id="numOptions" onchange="b
 
 <button type="button" class="externalButton" tabindex="-1" onclick="binding.addCategory();loadTable();">Add Category</button>
 <button type="button" class="externalButton" tabindex="-1" onclick="loadTable();">Update Puzzle</button>
-<br>
+<br><br>
+<hr color="blueviolet">
 
 <div class="conditionSection">
   <h3>Conditions</h3>
@@ -58,18 +60,13 @@ var binding = new ViewModel(puzzle);
 
 // Set up the display
 setUpInputs();
-loadTable();
+binding.updatePuzzle();
 binding.addCondition();   // start with a single condition
 
 function setUpInputs() {
     for (var i = 0; i < numCategories; ++i) {
         binding.addCategory();
     }
-}
-
-function loadTable() {
-    binding.loadNamingInputs();
-    binding.updatePuzzleTable();
 }
 
 function solvePuzzle() {

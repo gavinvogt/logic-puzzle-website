@@ -419,7 +419,7 @@ class Category {
      */
     addOption() {
         let newOption = new Option(this.count, this);
-        this.options[this.count] = newOption;
+        this.options.push(newOption);
         ++this.count;
         return newOption;
     }
