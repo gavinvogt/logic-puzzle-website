@@ -78,6 +78,7 @@ td:hover {
     margin-bottom: 10px;
     padding: 10px;
     border: 2px solid black;
+    box-shadow: 3px 3px 4px gray;
 }
 
 .optionInputDiv {
@@ -89,12 +90,23 @@ td:hover {
     margin-bottom: 10px;
     padding: 12px 12px 12px 12px;
     border: 2px solid black;
+    box-shadow: 3px 3px 4px gray;
 }
 
 .testContainer {
     margin-bottom: 10px;
     padding: 10px;
-    border: 1px solid black;
+    border: 2px solid;
+}
+
+.matchTest {
+    border-color: firebrick;
+    box-shadow: 2px 2px 5px -1px firebrick;
+}
+
+.compareTest {
+    border-color: blue;
+    box-shadow: 2px 2px 5px -1px blue;
 }
 
 .internalButton {

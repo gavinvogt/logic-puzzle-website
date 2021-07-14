@@ -52,11 +52,11 @@
     removeCategoryByIndex(categoryIndex) {
         this.categories.splice(categoryIndex, 1);
     }
-    
+
     /**
      * Gets a category in the Puzzle by ID
      * @param {number} categoryId is the ID of the category to get
-     * @returns {Category} the Category with matching ID
+     * @returns {Category} the Category with matching ID, or `undefined`
      */
     getCategoryById(categoryId) {
         return this.categories.find(cat => cat.getId() === categoryId);
