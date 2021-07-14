@@ -78,6 +78,113 @@ function getTestId(conditionId, testId) {
 }
 
 /**
+ * Creates the ID string for the condition logic selector
+ * @param {number} conditionId is the ID of the condition
+ * @returns {string} ID for the condition logic selection element
+ * @example getConditionLogicId(0) - 'condition0logic'
+ */
+function getConditionLogicId(conditionId) {
+    return "condition" + conditionId + "logic";
+}
+
+/**
+ * Creates the ID string for the condition number of tests true
+ * @param {number} conditionId is the ID of the condition
+ * @returns {string} ID for the condition number input element
+ * @example getConditionNumId(0) - 'condition0num'
+ */
+function getConditionNumId(conditionId) {
+    return "condition" + conditionId + "num";
+}
+
+/**
+ * Creates the ID string for the first category selection element
+ * of the given test
+ * @param {number} conditionId is the ID of the condition
+ * @param {number} testId is the ID of the test
+ * @returns {string} ID for the first category selection element
+ * @example getTestCat1Id(1, 2) - 'test1,2cat1'
+ */
+function getTestCat1Id(conditionId, testId) {
+    return getTestId(conditionId, testId) + "cat1";
+}
+
+/**
+ * Creates the ID string for the first option selection element
+ * of the given test
+ * @param {number} conditionId is the ID of the condition
+ * @param {number} testId is the ID of the test
+ * @returns {string} ID for the first option selection element
+ * @example getTestOption1Id(1, 2) - 'test1,2option1'
+ */
+function getTestOption1Id(conditionId, testId) {
+    return getTestId(conditionId, testId) + "option1";
+}
+
+/**
+ * Creates the ID string for the first operations input element
+ * of the given test
+ * @param {number} conditionId is the ID of the condition
+ * @param {number} testId is the ID of the test
+ * @returns {string} ID for the first operations input element
+ * @example getTestOps1Id(1, 2) - 'test1,2ops1'
+ */
+function getTestOps1Id(conditionId, testId) {
+    return getTestId(conditionId, testId) + "ops1";
+}
+
+/**
+ * Creates the ID string for the test type selection element
+ * of the given test
+ * @param {number} conditionId is the ID of the condition
+ * @param {number} testId is the ID of the test
+ * @returns {string} ID for the test type selection element
+ * @example getTestType(1, 2) - 'test1,2type'
+ */
+function getTestType(conditionId, testId) {
+    return getTestId(conditionId, testId) + "type";
+}
+
+/**
+ * Creates the ID string for the second category selection element
+ * of the given test
+ * @param {number} conditionId is the ID of the condition
+ * @param {number} testId is the ID of the test
+ * @returns {string} ID for the second category selection element
+ * @example getTestCat2Id(1, 2) - 'test1,2cat2'
+ */
+function getTestCat2Id(conditionId, testId) {
+    return getTestId(conditionId, testId) + "cat2";
+}
+
+/**
+ * Creates the ID string for the second option selection element
+ * of the given test
+ * @param {number} conditionId is the ID of the condition
+ * @param {number} testId is the ID of the test
+ * @returns {string} ID for the second option selection element
+ * @example getTestOption2Id(1, 2) - 'test1,2option2'
+ */
+function getTestOption2Id(conditionId, testId) {
+    return getTestId(conditionId, testId) + "option2";
+}
+
+/**
+ * Creates the ID string for the second operations input element
+ * of the given test
+ * @param {number} conditionId is the ID of the condition
+ * @param {number} testId is the ID of the test
+ * @returns {string} ID for the second operations input element
+ * @example getTestOps2Id(1, 2) - 'test1,2ops2'
+ */
+function getTestOps2Id(conditionId, testId) {
+    return getTestId(conditionId, testId) + "ops2";
+}
+
+
+
+
+/**
  * This class represents the View-Model for a category input along with
  * all the option names
  */
