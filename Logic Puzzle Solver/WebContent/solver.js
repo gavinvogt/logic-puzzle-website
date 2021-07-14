@@ -579,11 +579,14 @@ class Condition {
      * Creates the condition, which performs each test on the puzzle
      * and verifies that the required number of tests were true.
      * @param {Test[]} tests is the list of tests in this condition
-     * @param {number} num_true is the number of tests that must be true
+     * @param {number} numTrue is the number of tests that must be true
+     * @param {string} logic is the logic for comparing the number of tests
+     * that were actually true to `numTrue`
      */
-    constructor(tests, num_true) {
-        self.tests = tests
-        self.num = num_true
+    constructor(tests, numTrue, logic) {
+        this.tests = tests;
+        this.num = numTrue;
+        this.logic = logic;
     }
 
     /**

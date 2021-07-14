@@ -521,6 +521,10 @@ class MatchTestViewModel extends TestViewModel {
             + this._generateCat2Html() + " " + this._generateOption2Html();
         return testStr + "</div>";
     }
+
+    createTest() {
+        return new MatchTest();
+    }
 }
 
 class CompareTestViewModel extends TestViewModel {
@@ -621,6 +625,10 @@ class CompareTestViewModel extends TestViewModel {
      */
     getOps2() {
         return this.ops2Input.value;
+    }
+
+    createTest() {
+        return new CompareTest();
     }
 }
 
@@ -726,7 +734,7 @@ class ConditionViewModel {
         }
 
         // Create the condition
-        return Condition();
+        return new Condition(tests, numTrue, logic);
     }
 }
 
