@@ -5,6 +5,21 @@
  * @author Gavin Vogt
  */
 
+
+
+/**
+ * Creates the cell ID string for the given cell
+ * @param {number} cat1 is the ID of the first category
+ * @param {number} option1 is the ID of the first option
+ * @param {number} cat2  is the ID of the second category
+ * @param {number} option2 is the ID of the second option
+ * @returns {string} cell ID used within the HTML view
+ * @example getCellId(0, 0, 1, 2) - 'cell0,0-1,2'
+ */
+function getCellId(cat1, option1, cat2, option2) {
+    return "cell" + cat1 + "," + option1 + "-" + cat2 + "," + option2;
+}
+
 /**
  * Creates the category ID string for the given category
  * @param {number} categoryId is the ID of the category
@@ -749,7 +764,6 @@ class ConditionViewModel {
 
         // Create the tests
         let tests = [];
-        //console.log(this.tests.values());
         for (const testVM of this.tests.values()) {
             tests.push(testVM.createTest());
         }

@@ -74,7 +74,7 @@ function loadTable() {
 
 function solvePuzzle() {
     // Make sure the user's inputs are valid
-    binding.loadNamingInputs();
+    loadTable();
     var validity = puzzle.validate();
     if (validity != null) {
         // Got an error message
@@ -86,15 +86,38 @@ function solvePuzzle() {
     console.log(conditions);
 
     // Solve the puzzle
-    var solution = puzzle.solveBruteForce(conditions); // array of Entities
-    // TODO: how to present the solution
+    var solution = puzzle.solveBruteForce(conditions);  // array of Entities
     if (solution == null) {
         alert("No solution found");
     } else {
-        //"<img src='images/selection_marker.png' alt='X' height='14px' width='14px'>";
-        
+        // Display the solution on the graph
+        solution.forEach(entity => {
+            puzzle.getCategories().forEach(category => {
+                let leftCatId = category.getId();
+                let leftOptionId = entity.getAttribute(leftCatId).getId();
+                puzzle.getCategories().forEach(otherCategory => {
+                    let topCatId = otherCategory.getId();
+                    if (leftCatId !== topCatId) {
+                        // Valid coordinates - attempt to place marker
+                        let topOptionId = entity.getAttribute(topCatId).getId();
+                        let cellId = getCellId(leftCatId, leftOptionId, topCatId, topOptionId);
+                        placeImage(cellId);
+                    }
+                });
+            });
+        });
+
+
         alert("Solved logic puzzle");
         console.log(solution);
+    }
+}
+
+const IMAGE_HTML = "<img src='images/selection_marker.png' alt='X' height='14px' width='14px'>";
+function placeImage(cellId) {
+    let cell = document.getElementById(cellId);
+    if (cell) {
+        cell.innerHTML = IMAGE_HTML;
     }
 }
 

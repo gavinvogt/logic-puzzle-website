@@ -143,14 +143,11 @@
         let entities = [];
         let optionCount = this.categories[0].numOptions();
         for (let i = 0; i < optionCount; ++i) {
-            entities[i] = new Entity();
+            entities.push(new Entity());
         }
-
-        // TODO: brute force and elegant version
-        
-        // TODO: create each possibility
-        let catIndices = [...this.categories.keys()];
-        return this.solveBruteForceHelper(conditions, entities, catIndices, 0);
+        console.log(this.categories);
+        console.log("Length: " + this.categories.length);
+        return this.solveBruteForceHelper(conditions, entities, 0);
     }
 
     /**
@@ -160,37 +157,36 @@
      * be satisfied by the entities
      * @param {Entity[]} entities is the array of entities representing the
      * potential solution
-     * @param {number[]} catIndices is the array of category indices
      * @param {number} curIndex is the index of the current category index to use
      * @returns {Entity[]} array of entities representing the solution
      */
-    solveBruteForceHelper(conditions, entities, catIndices, curIndex) {
+    solveBruteForceHelper(conditions, entities, curIndex) {
         // Get possible permutations of option IDs for this category
         let category = this.categories[curIndex];
-        let categoryId = category.getId();
         let optionIds = [];
         category.getOptions().forEach(option => {
             optionIds.push(option.getId());
         })
         // Implementation yoinked from https://stackoverflow.com/a/22063440
-        var permutations = catIndices.reduce(function permute(res, item, key, arr) {
+        var permutations = optionIds.reduce(function permute(res, item, key, arr) {
             return res.concat(arr.length > 1 && arr.slice(0, key).concat(arr.slice(key + 1)).reduce(permute, []).map(function(perm) { return [item].concat(perm); }) || item);
         }, []);
         
         // Try each permutation
-        permutations.forEach(permutation => {
-            // Apply the permutation
+        let categoryId = category.getId();
+        for (let j = 0, n = permutations.length; j < n; ++j) {
+            // Apply the permutation (array of option IDs)
+            let permutation = permutations[j];
+            console.log("Applying " + permutation + " at index " + curIndex);
             for (let i = 0; i < entities.length; ++i) {
                 let option = category.getOption(permutation[i]);
                 entities[i].setAttribute(categoryId, option);
             }
 
             // Check solution OR recurse deeper to fill in other categories
-            ++curIndex;
-            if (curIndex < catIndices.length) {
+            if (curIndex < this.categories.length - 1) {
                 // Need to go deeper
-                let solution = this.solveBruteForceHelper(conditions, entities,
-                                                      catIndices, curIndex);
+                let solution = this.solveBruteForceHelper(conditions, entities, curIndex + 1);
                 if (solution !== null) {
                     // Found solution
                     return solution;
@@ -203,7 +199,7 @@
                 }
                 // Otherwise continue through other permutations
             }
-        });
+        }
 
         // Failed to solve the Puzzle
         return null;
@@ -217,12 +213,14 @@
      * arrangement
      */
     _isSolved(conditions) {
-        conditions.forEach(condition => {
-            if (!condition.check(this)) {
+        for (let i = 0, n = conditions.length; i < n; ++i) {
+            if (!conditions[i].check(this)) {
                 // Failed a condition
                 return false;
             }
-        });
+        }
+
+        // Passed all conditions
         return true;
     }
     
@@ -305,9 +303,9 @@
         let topCategoryId = 1;
         while (topCategoryId < this.numCategories() && topCategoryId != leftCategoryIndex) {
             for (let topOptionId = 0; topOptionId < numOptions; topOptionId++) {
-                // ID string: "{leftCat},{leftOption},{topCat},{topOption}"
-                let idStr = leftCategoryIndex + "," + leftOptionId + ","
-                        + topCategoryId + "," + topOptionId;
+                // ID string: "cell{leftCat},{leftOption}-{topCat},{topOption}"
+                let idStr = getCellId(leftCategoryIndex, leftOptionId,
+                                      topCategoryId, topOptionId);
                 let classStr = this._getLocationClass(leftOptionId, topOptionId,
                         numOptions);
                 rowStr += "<td class='" + classStr + "' id='" + idStr + "'></td>";
@@ -598,7 +596,7 @@ class Condition {
      */
     check(puzzle) {
         // Get number of true tests
-        var count = 0;
+        let count = 0;
         this.tests.forEach(test => {
             count += test.check(puzzle);
         });
@@ -606,7 +604,7 @@ class Condition {
         // Check if number correct passes the logic
         switch (this.logic) {
             case "=":
-                return (count !== this.num);
+                return (count === this.num);
             case "!=":
                 return (count !== this.num);
             case "<":
@@ -618,8 +616,10 @@ class Condition {
             case ">=":
                 return (count >= this.num);
         }
+
+        // Didn't recognize logic
+        return false;
     }
-    
 }
 
 /**
