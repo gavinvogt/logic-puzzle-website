@@ -1,3 +1,5 @@
 */.settings/
 */.vscode/
-*.project
+*/.settings/*
+*/.vscode/*
+*/.project
