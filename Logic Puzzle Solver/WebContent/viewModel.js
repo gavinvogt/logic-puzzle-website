@@ -415,7 +415,7 @@ class TestViewModel {
         this.puzzle.getCategories().forEach(category => {
             let catOption = document.createElement("option");
             catOption.value = category.getId();
-            catOption.text = category.getIdentifier();
+            catOption.text = category.getName();
             catSelect.append(catOption);
         });
 
@@ -444,7 +444,7 @@ class TestViewModel {
         category.getOptions().forEach(option => {
             let optOption = document.createElement("option");
             optOption.value = option.getId();
-            optOption.text = option.getIdentifier();
+            optOption.text = option.getName();
             optionSelect.append(optOption);
         });
 
@@ -470,7 +470,7 @@ class TestViewModel {
                     + '" onchange="binding.updateTests(' + this.conditionId + ');">';
         this.puzzle.getCategories().forEach(category => {
             testStr += "<option value='" + category.getId() + "'>"
-                    + category.getIdentifier() + "</option>";
+                    + category.getName() + "</option>";
         });
         return testStr + "</select>";
     }
@@ -481,7 +481,7 @@ class TestViewModel {
         let firstCategory = this.puzzle.getCategoryByIndex(0);
         firstCategory.getOptions().forEach(option => {
             testStr += "<option value='" + option.getId() + "'>"
-                    + option.getIdentifier() + "</option>";
+                    + option.getName() + "</option>";
         });
         return testStr + "</select>";
     }
@@ -638,7 +638,7 @@ class CompareTestViewModel extends TestViewModel {
         let testStr = '<select id="' + getTestSubCatId(this.conditionId, this.id, num) + '">';
         this.puzzle.getCategories().forEach(category => {
             testStr += "<option value='" + category.getId() + "'>"
-                    + category.getIdentifier() + "</option>";
+                    + category.getName() + "</option>";
         });
         return testStr + "</select>";
     }

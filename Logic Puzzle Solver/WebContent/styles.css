@@ -36,10 +36,6 @@ td, th {
     white-space: nowrap;
 }
 
-td:hover {
-    background-color: rgba(255, 0, 0, 0.34);
-}
-
 .flexContainer {
     display: flex;
     flex-direction: row;
