@@ -464,6 +464,11 @@ class TestViewModel {
         return testDiv;
     }
 
+    /**
+     * Gerates the HTML string for a category select element
+     * @param {number} num is the number (1 or 2)
+     * @returns {string} HTML for the category select
+     */
     _generateCatHtml(num) {
         // <select> for the a Category
         let testStr = '<select id="' + getTestCatId(this.conditionId, this.id, num)
@@ -475,6 +480,11 @@ class TestViewModel {
         return testStr + "</select>";
     }
 
+    /**
+     * Gerates the HTML string for an option select element
+     * @param {number} num is the number (1 or 2)
+     * @returns {string} HTML for the option select
+     */
     _generateOptionHtml(num) {
         // <select> for an option
         let testStr = '<select id="' + getTestOptionId(this.conditionId, this.id, num) + '">';
@@ -486,6 +496,11 @@ class TestViewModel {
         return testStr + "</select>";
     }
 
+    /**
+     * Generates the HTML string for a test type select element
+     * @param  {...string} types are all the test type options to include
+     * @returns {string} HTML for the type select
+     */
     _generateTypeHtml(...types) {
         // <select> for the test
         let typeStr = '<select id="' + getTestTypeId(this.conditionId, this.id) + '">';
@@ -496,6 +511,10 @@ class TestViewModel {
         return typeStr + "</select>";
     }
 
+    /**
+     * Generates the HTML string for the test remove button
+     * @returns {string} HTML for the test remove button
+     */
     _generateRemoveHtml() {
         // Button to remove test
         return '<button type="button" class="internalButton" onclick="binding.removeTest('
@@ -520,6 +539,9 @@ class TestViewModel {
                 getTestOptionId(this.conditionId, this.id, 2));
     }
 
+    /**
+     * Saves all the values for this test
+     */
     saveValues() {
         this.findViewElements();
         this.cat1 = this.getCat1();
@@ -592,6 +614,10 @@ class MatchTestViewModel extends TestViewModel {
         return testDiv;
     }
 
+    /**
+     * Creates the Test corresponding to the inputs in the View
+     * @returns {MatchTest} MatchTest created from the inputs
+     */
     createTest() {
         this.findViewElements();
         let cat1 = Number(this.getCat1());
@@ -608,6 +634,9 @@ class CompareTestViewModel extends TestViewModel {
         super(puzzle, conditionId, testId);
     }
 
+    /**
+     * Finds all the elements in the View
+     */
     findViewElements() {
         super.findViewElements();
         this.subCat1Select = document.getElementById(
@@ -620,6 +649,10 @@ class CompareTestViewModel extends TestViewModel {
             getTestOpsId(this.conditionId, this.id, 2));
     }
 
+    /**
+     * Creates the div for this test
+     * @returns {HTMLDivElement} div for the test
+     */
     generateTestDiv() {
         // Create test container
         let testDiv = this._createDiv("compareTest");
@@ -633,6 +666,11 @@ class CompareTestViewModel extends TestViewModel {
         return testDiv;
     }
 
+    /**
+     * Generates the HTML string for the sub-category select element
+     * @param {number} num is the number (1 or 2)
+     * @returns {string} HTML for the sub-category select element
+     */
     _generateSubCatHtml(num) {
         // <select> for a sub-category
         let testStr = '<select id="' + getTestSubCatId(this.conditionId, this.id, num) + '">';
@@ -643,6 +681,11 @@ class CompareTestViewModel extends TestViewModel {
         return testStr + "</select>";
     }
 
+    /**
+     * Generates the HTML string for the operations input element
+     * @param {number} num is the number (1 or 2)
+     * @returns {string} HTML for the operations input element
+     */
     _generateOpsHtml(num) {
         // Operations for the operations to do
         return '<input maxlength="15" size="10" id="'
@@ -671,6 +714,9 @@ class CompareTestViewModel extends TestViewModel {
         this._fillCatSelect(this.subCat2Select, this.subCat2);
     }
 
+    /**
+     * Saves the values for this test
+     */
     saveValues() {
         super.saveValues();
         this.subCat1 = this.getSubCat1();
@@ -709,6 +755,10 @@ class CompareTestViewModel extends TestViewModel {
         return this.ops2Input.value;
     }
 
+    /**
+     * Creates the Test corresponding to the inputs in the View
+     * @returns {CompareTest} CompareTest created from the inputs
+     */
     createTest() {
         this.findViewElements();
         let cat1 = Number(this.getCat1());
@@ -749,10 +799,9 @@ class ConditionViewModel {
         return this.id;
     }
 
-    getConditionElement() {
-        return document.getElementById(getConditionId(this.id));
-    }
-
+    /**
+     * Finds all the elements in the View
+     */
     findViewElements() {
         this.testsDiv = document.getElementById(getTestsId(this.id));
         this.logicSelect = document.getElementById(getConditionLogicId(this.id));
@@ -1069,6 +1118,10 @@ class ViewModel {
         this.conditions.get(conditionId).removeTest(testId);
     }
 
+    /**
+     * Creates the array of Conditions based on the View
+     * @returns {Condition[]} array of Conditions for puzzle to pass
+     */
     createConditions() {
         let conditions = [];
         for (const conditionVM of this.conditions.values()) {
