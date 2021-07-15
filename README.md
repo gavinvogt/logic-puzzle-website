@@ -6,7 +6,7 @@ If a solution can be found, the table will display the first one found.
 ### Match Test
 A match test locates the entity that has each option as an attribute, and checks if they are the same entity.
 
-Example: `color` `red` IS `shape` `circle`
+Example: `color` `red` is `shape` `circle`
 
 The red entity must also be the circle
 
