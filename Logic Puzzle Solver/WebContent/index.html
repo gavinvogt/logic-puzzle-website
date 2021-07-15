@@ -15,7 +15,7 @@
 <form onsubmit="solvePuzzle();return false;">
 <button type="submit" class="solveButton">Solve</button>
 <h2>Setup</h2>
-Number of options per category: <input type="number" id="numOptions" onchange="binding.updateNumOptions();" value="2" min="2">
+Number of options per category: <input type="number" id="numOptions" onchange="binding.updateNumOptions();" value="3" min="2">
 <br><br>
 <hr color="blueviolet">
 
@@ -54,7 +54,7 @@ Number of options per category: <input type="number" id="numOptions" onchange="b
 var puzzle = new Puzzle();
 
 // Track various counts
-var numCategories = 2;
+var numCategories = 3;
 
 // Set up the View-Model
 var binding = new ViewModel(puzzle);
