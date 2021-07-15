@@ -6,7 +6,8 @@ If a solution can be found, the table will display the first one found.
 ### Match Test
 A match test locates the entity that has each option as an attribute, and checks if they are the same entity.
 
-Example: color red IS shape circle
+Example: `color` `red` IS `shape` `circle`
+
 The red entity must also be the circle
 
 ### Compare Test
@@ -14,7 +15,8 @@ A compare test find the entity with a given option as an attribute. It then find
 selected for the given sub-category. The string value of that option's name is compared to the other option's name.
 Operations may be done on each option name (such as converting to a number for numerical comparison).
 
-Example: color red sideCount > color blue sideCount
+Example: `color` `red` `sideCount` > `color` `blue` `sideCount`
+
 The entity that is red must have a larger sideCount than the entity that is blue.
 
 ### Operations
