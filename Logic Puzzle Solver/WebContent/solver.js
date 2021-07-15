@@ -147,8 +147,6 @@
         for (let i = 0; i < optionCount; ++i) {
             entities.push(new Entity());
         }
-        console.log(this.categories);
-        console.log("Length: " + this.categories.length);
         return this.solveBruteForceHelper(conditions, entities, 0);
     }
 
@@ -179,7 +177,6 @@
         for (let j = 0, n = permutations.length; j < n; ++j) {
             // Apply the permutation (array of option IDs)
             let permutation = permutations[j];
-            console.log("Applying " + permutation + " at index " + curIndex);
             for (let i = 0; i < entities.length; ++i) {
                 let option = category.getOption(permutation[i]);
                 entities[i].setAttribute(categoryId, option);
@@ -727,16 +724,6 @@ class CompareTest extends Test {
         let option2 = category2.getOption(this.option2);
         let attr2 = option2.getEntity().getAttribute(this.subCat2).getName();
         let val2 = this._applyOperations(attr2, this.ops2);
-        
-        /*
-        console.log("Attrs:");
-        console.log(attr1);
-        console.log(attr2);
-
-        console.log("After operations:");
-        console.log("val1: " + val1 + " (" + typeof val1 +")");
-        console.log("val2: " + val2 + " (" + typeof val2 +")");
-        */
 
         // Check if the logical test is true
         switch (this.test) {

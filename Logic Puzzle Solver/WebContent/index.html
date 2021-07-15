@@ -40,8 +40,10 @@ Number of options per category: <input type="number" id="numOptions" onchange="b
 </div>
 
 <div class="solutionDiv" id="solution">
-<h2 class="solution">Solution</h2>
-<table id="puzzle"></table>
+  <h2 class="solution">Solution</h2>
+  <table id="puzzle"></table>
+  <br>
+  <div id="entitiesDiv"></div>
 </div>
 </div>
 
@@ -56,6 +58,7 @@ var numCategories = 2;
 
 // Set up the View-Model
 var binding = new ViewModel(puzzle);
+var entitiesDiv = document.getElementById("entitiesDiv");
 
 // Set up the display
 setUpInputs();
@@ -78,10 +81,8 @@ function solvePuzzle() {
         return;
     }
 
-    var conditions = binding.createConditions();
-    console.log(conditions);
-
     // Solve the puzzle
+    var conditions = binding.createConditions();
     var solution = puzzle.solveBruteForce(conditions);  // array of Entities
     if (solution == null) {
         alert("No solution found");
@@ -103,18 +104,42 @@ function solvePuzzle() {
             });
         });
 
-
         alert("Solved logic puzzle");
-        console.log(solution);
+        displayEntities(solution);
     }
 }
 
-const IMAGE_HTML = "<img src='images/selection_marker.png' alt='X' height='14px' width='14px'>";
+const IMAGE_HTML = "<img src='images/selection_marker.png' alt='X' height='20px' width='20px'>";
 function placeImage(cellId) {
     let cell = document.getElementById(cellId);
     if (cell) {
         cell.innerHTML = IMAGE_HTML;
     }
+}
+
+function displayEntities(entities) {
+    entitiesDiv.innerHTML = '<hr color="blueviolet"><br>';
+    let entitiesTable = document.createElement("table");
+    let catNameRow = document.createElement("tr");
+    puzzle.getCategories().forEach(category => {
+        let cell = document.createElement("td");
+        cell.bgColor = "lightgray";
+        cell.innerText = category.getName();
+        catNameRow.append(cell);
+    });
+    entitiesTable.append(catNameRow);
+
+    entities.forEach(entity => {
+        // Add info for this entity
+        let entityRow = document.createElement("tr");
+        puzzle.getCategories().forEach(category => {
+            let cell = document.createElement("td");
+            cell.innerText = entity.getAttribute(category.getId()).getName();
+            entityRow.append(cell);
+        });
+        entitiesTable.append(entityRow);
+    });
+    entitiesDiv.append(entitiesTable);
 }
 
 
