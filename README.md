@@ -31,3 +31,9 @@ The entity that is red must have a larger sideCount than the entity that is blue
 `*n` - multiplies by `n`
 
 `/n` - divides by `n`
+
+Common operations input:
+
+* `#` to convert the option name to a number
+* `[0] #` to convert a specific character to a number
+* `# +2` to convert the option name to a number and modify it in some way
