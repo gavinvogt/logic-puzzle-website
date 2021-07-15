@@ -21,8 +21,13 @@ The entity that is red must have a larger sideCount than the entity that is blue
 
 ### Operations
 `[i]` - selects the `i`'th character from the string (0-indexed)
+
 `#` - converts string to number
+
 `+n` - adds by `n`
+
 `-n` - subtracts by `n`
+
 `*n` - multiplies by `n`
+
 `/n` - divides by `n`
